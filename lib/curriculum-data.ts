@@ -1078,6 +1078,820 @@ export const subjects: Subject[] = [
       },
     ],
   },
+
+  // GERMAN
+  {
+    name: "German",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8668",
+        papers: [
+          {
+            name: "Paper 1: Listening",
+            duration: "35 minutes (F) / 45 minutes (H)",
+            marks: 40,
+            percentage: 25,
+            content: ["Understanding spoken German in various contexts"],
+          },
+          {
+            name: "Paper 2: Speaking",
+            duration: "7-9 minutes (F) / 10-12 minutes (H)",
+            marks: 60,
+            percentage: 25,
+            content: ["Role play", "Photo card discussion", "General conversation"],
+          },
+          {
+            name: "Paper 3: Reading",
+            duration: "45 minutes (F) / 1 hour (H)",
+            marks: 60,
+            percentage: 25,
+            content: ["Understanding written German texts"],
+          },
+          {
+            name: "Paper 4: Writing",
+            duration: "1 hour (F) / 1 hour 15 minutes (H)",
+            marks: 50,
+            percentage: 25,
+            content: ["Structured writing tasks", "Translation into German"],
+          },
+        ],
+        keyTopics: [
+          "Theme 1: Identity and culture (family, technology, free time, customs)",
+          "Theme 2: Local, national, international areas (holidays, social issues, environment)",
+          "Theme 3: Current and future study and employment (school, jobs, ambitions)",
+          "Grammar: cases (nominative, accusative, dative, genitive), word order, tenses",
+          "Vocabulary: high-frequency words, topic-specific vocabulary",
+        ],
+      },
+    ],
+  },
+
+  // BUSINESS STUDIES
+  {
+    name: "Business",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8132",
+        papers: [
+          {
+            name: "Paper 1: Influences of Operations and HRM on Business Activity",
+            duration: "1 hour 45 minutes",
+            marks: 90,
+            percentage: 50,
+            content: [
+              "Business in the real world",
+              "Influences on business",
+              "Business operations",
+              "Human resources",
+            ],
+          },
+          {
+            name: "Paper 2: Influences of Marketing and Finance on Business Activity",
+            duration: "1 hour 45 minutes",
+            marks: 90,
+            percentage: 50,
+            content: [
+              "Business in the real world",
+              "Influences on business",
+              "Marketing",
+              "Finance",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Business activity: purpose, ownership, stakeholders, location",
+          "Marketing: market research, marketing mix (4Ps), product life cycle",
+          "Finance: sources of finance, cash flow, break-even, profit and loss",
+          "Operations: production methods, quality, supply chain, technology",
+          "Human resources: recruitment, training, motivation, organisational structures",
+          "External influences: economic, legal, environmental, ethical",
+          "Business growth: internal vs external, mergers, takeovers",
+        ],
+      },
+      {
+        boardId: "edexcel",
+        specCode: "1BS0",
+        papers: [
+          {
+            name: "Paper 1: Investigating Small Business",
+            duration: "1 hour 30 minutes",
+            marks: 90,
+            percentage: 50,
+            content: ["Enterprise and entrepreneurship", "Spotting business opportunities", "Putting a business idea into practice", "Making the business effective", "External influences"],
+          },
+          {
+            name: "Paper 2: Building a Business",
+            duration: "1 hour 30 minutes",
+            marks: 90,
+            percentage: 50,
+            content: ["Growing the business", "Making marketing decisions", "Making operational decisions", "Making financial decisions", "Making HR decisions"],
+          },
+        ],
+        keyTopics: [
+          "Enterprise: risk and reward, role of business enterprise",
+          "Business calculations: revenue, costs, profit, interest, exchange rates",
+          "Market segmentation and targeting",
+          "Business plans and cash flow forecasts",
+          "Legislation: consumer, employment, health and safety",
+        ],
+      },
+    ],
+  },
+
+  // ECONOMICS
+  {
+    name: "Economics",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8136",
+        papers: [
+          {
+            name: "Paper 1: How Markets Work",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: [
+              "Economic foundations",
+              "Resource allocation",
+              "How prices are determined",
+              "Production, costs, revenue and profit",
+              "Competitive and concentrated markets",
+              "Market failure",
+            ],
+          },
+          {
+            name: "Paper 2: How the Economy Works",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: [
+              "Economic objectives",
+              "Macroeconomic indicators",
+              "Government policy",
+              "International trade and the global economy",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Scarcity, choice, opportunity cost",
+          "Supply and demand curves, equilibrium price",
+          "Price elasticity of demand (PED) and supply (PES)",
+          "Market failure: externalities, public goods, merit goods",
+          "Economic growth, inflation, unemployment, balance of payments",
+          "Fiscal policy: taxation and government spending",
+          "Monetary policy: interest rates, money supply",
+          "International trade: imports, exports, exchange rates, globalisation",
+        ],
+      },
+      {
+        boardId: "ocr",
+        specCode: "J205",
+        papers: [
+          {
+            name: "Paper 1: Introduction to Economics",
+            duration: "1 hour 30 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Main economic groups", "Markets", "Market failure and government intervention"],
+          },
+          {
+            name: "Paper 2: National and International Economics",
+            duration: "1 hour 30 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Role of money and financial markets", "Economic objectives", "How the government manages the economy"],
+          },
+        ],
+        keyTopics: [
+          "Economic problem: scarcity, choice, opportunity cost",
+          "Production possibility frontiers",
+          "Markets: demand, supply, price determination",
+          "Role of banks and financial institutions",
+          "Government objectives: growth, employment, inflation, trade",
+        ],
+      },
+    ],
+  },
+
+  // PSYCHOLOGY
+  {
+    name: "Psychology",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8182",
+        papers: [
+          {
+            name: "Paper 1: Cognition and Behaviour",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: [
+              "Memory",
+              "Perception",
+              "Development",
+              "Research methods",
+            ],
+          },
+          {
+            name: "Paper 2: Social Context and Behaviour",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: [
+              "Social influence",
+              "Language, thought and communication",
+              "Brain and neuropsychology",
+              "Psychological problems",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Memory: multi-store model, working memory, forgetting",
+          "Perception: theories (Gregory, Gibson), factors affecting perception",
+          "Development: Piaget's stages, Vygotsky, learning theories",
+          "Social influence: conformity, obedience, prosocial behaviour",
+          "Language and thought: Piaget vs Sapir-Whorf hypothesis",
+          "Brain and neuropsychology: brain structure, localisation of function",
+          "Psychological problems: depression, addiction - characteristics and treatments",
+          "Research methods: experiments, observations, self-reports, correlations",
+        ],
+      },
+      {
+        boardId: "edexcel",
+        specCode: "1PS0",
+        papers: [
+          {
+            name: "Paper 1",
+            duration: "1 hour 45 minutes",
+            marks: 98,
+            percentage: 50,
+            content: ["Development", "Memory", "Psychological problems", "The brain and neuropsychology", "Social influence"],
+          },
+          {
+            name: "Paper 2",
+            duration: "1 hour 45 minutes",
+            marks: 98,
+            percentage: 50,
+            content: ["Criminal psychology", "Sleep and dreaming", "Research methods"],
+          },
+        ],
+        keyTopics: [
+          "Criminal psychology: what makes a criminal, eyewitness testimony",
+          "Sleep and dreaming: stages of sleep, theories of dreaming",
+          "Research methods: experimental design, ethics, data analysis",
+        ],
+      },
+    ],
+  },
+
+  // SOCIOLOGY
+  {
+    name: "Sociology",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8192",
+        papers: [
+          {
+            name: "Paper 1: The Sociology of Families and Education",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: [
+              "The sociology of families",
+              "The sociology of education",
+              "Relevant areas of social theory and methodology",
+            ],
+          },
+          {
+            name: "Paper 2: The Sociology of Crime and Deviance and Social Stratification",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: [
+              "The sociology of crime and deviance",
+              "Social stratification",
+              "Relevant areas of social theory and methodology",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Families: functions of family, family diversity, changing family patterns",
+          "Education: role of education, class/gender/ethnicity differences in achievement",
+          "Crime and deviance: definitions, patterns, explanations, social control",
+          "Social stratification: class, gender, ethnicity, age",
+          "Sociological theories: functionalism, Marxism, feminism, interactionism",
+          "Research methods: surveys, interviews, observations, secondary data",
+        ],
+      },
+    ],
+  },
+
+  // MEDIA STUDIES
+  {
+    name: "Media Studies",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8572",
+        papers: [
+          {
+            name: "Paper 1: Media One",
+            duration: "1 hour 30 minutes",
+            marks: 84,
+            percentage: 35,
+            content: [
+              "Section A: Media language and representation",
+              "Section B: Media industries and audiences",
+            ],
+          },
+          {
+            name: "Paper 2: Media Two",
+            duration: "1 hour 30 minutes",
+            marks: 84,
+            percentage: 35,
+            content: [
+              "Television",
+              "Music (music video and online media)",
+            ],
+          },
+        ],
+        coursework: {
+          name: "Non-Exam Assessment",
+          percentage: 30,
+          description: "Create media product from set brief - e.g., website pages, TV sequence, magazine",
+        },
+        keyTopics: [
+          "Media language: codes and conventions, genre, narrative, representation",
+          "Media representations: gender, ethnicity, age, issues and events",
+          "Media industries: ownership, production, distribution, regulation",
+          "Media audiences: target audiences, uses and gratifications, effects theories",
+          "Close study products (CSPs): set texts for detailed analysis",
+          "Theoretical perspectives: Barthes, Todorov, Levi-Strauss, Gauntlett",
+        ],
+      },
+      {
+        boardId: "ocr",
+        specCode: "J200",
+        papers: [
+          {
+            name: "Paper 1: Media Messages",
+            duration: "1 hour 45 minutes",
+            marks: 70,
+            percentage: 35,
+            content: ["News and film industry", "Media language and representation"],
+          },
+          {
+            name: "Paper 2: Evolving Media",
+            duration: "1 hour 15 minutes",
+            marks: 70,
+            percentage: 35,
+            content: ["Gaming, radio and music industry", "Audiences and industries"],
+          },
+        ],
+        coursework: {
+          name: "NEA Production",
+          percentage: 30,
+          description: "Create cross-media production from choice of briefs",
+        },
+        keyTopics: [
+          "Media language across forms",
+          "Representation and stereotyping",
+          "Industry: production, distribution, exhibition",
+          "Audience theories and targeting",
+        ],
+      },
+    ],
+  },
+
+  // FOOD PREPARATION AND NUTRITION
+  {
+    name: "Food Preparation and Nutrition",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8585",
+        papers: [
+          {
+            name: "Paper 1: Food Preparation and Nutrition",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: [
+              "Food, nutrition and health",
+              "Food science",
+              "Food safety",
+              "Food choice",
+              "Food provenance",
+            ],
+          },
+        ],
+        coursework: {
+          name: "Non-Exam Assessment",
+          percentage: 50,
+          description: "Task 1: Food investigation (15%). Task 2: Food preparation assessment (35%) - 3 hours practical",
+        },
+        keyTopics: [
+          "Macronutrients: proteins, fats, carbohydrates - functions and sources",
+          "Micronutrients: vitamins and minerals - functions and deficiencies",
+          "Energy needs, balanced diet, diet-related health problems",
+          "Food science: dextrinisation, caramelisation, Maillard reaction, gelatinisation",
+          "Functional properties of ingredients: raising agents, setting, shortening",
+          "Food safety: bacteria, food poisoning, storage, cross-contamination",
+          "Food provenance: where food comes from, food miles, sustainability",
+          "Food choice: religion, culture, ethics, cost, availability",
+          "Practical skills: knife skills, sauces, pastry, bread, cook methods",
+        ],
+      },
+      {
+        boardId: "wjec",
+        specCode: "C560",
+        papers: [
+          {
+            name: "Component 1: Principles of Food Preparation and Nutrition",
+            duration: "1 hour 45 minutes",
+            marks: 100,
+            percentage: 50,
+            content: ["Food commodities", "Principles of nutrition", "Diet and good health", "The science of food", "Where food comes from", "Cooking and food preparation"],
+          },
+        ],
+        coursework: {
+          name: "Component 2: NEA",
+          percentage: 50,
+          description: "Food Investigation (15%) and Food Preparation (35%)",
+        },
+        keyTopics: [
+          "Food commodities: meat, fish, eggs, dairy, cereals, fruit, vegetables",
+          "Nutritional needs across life stages",
+          "Diet-related health: obesity, CHD, diabetes, anaemia",
+          "Food science and cooking methods",
+          "Sustainability and food provenance",
+        ],
+      },
+    ],
+  },
+
+  // HEALTH AND SOCIAL CARE
+  {
+    name: "Health and Social Care",
+    examBoards: [
+      {
+        boardId: "ocr",
+        specCode: "J835",
+        papers: [
+          {
+            name: "R032: Principles of Care in Health and Social Care Settings",
+            duration: "1 hour 15 minutes",
+            marks: 80,
+            percentage: 40,
+            content: [
+              "The rights of individuals",
+              "Person-centred values",
+              "Communication in health and social care",
+              "Protecting service users from harm",
+            ],
+          },
+        ],
+        coursework: {
+          name: "R033 & R034 (choose 2 from 5 units)",
+          percentage: 60,
+          description: "Coursework units covering: Life stages, Health and wellbeing, Body systems, Diseases and disorders, Health promotion",
+        },
+        keyTopics: [
+          "Care values: dignity, respect, privacy, confidentiality, safety",
+          "Person-centred care: empowerment, choice, independence",
+          "Communication: verbal, non-verbal, written, barriers to communication",
+          "Safeguarding: abuse types, signs, reporting procedures",
+          "Life stages: infancy, childhood, adolescence, adulthood, later adulthood",
+          "PIES: physical, intellectual, emotional, social development",
+          "Factors affecting health: lifestyle, genetics, environment, socioeconomic",
+          "Health services: NHS structure, primary/secondary/tertiary care",
+        ],
+      },
+    ],
+  },
+
+  // DANCE
+  {
+    name: "Dance",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8236",
+        papers: [
+          {
+            name: "Component 1: Performance and Choreography",
+            duration: "Practical",
+            marks: 80,
+            percentage: 60,
+            content: [
+              "Set phrases (through a solo performance)",
+              "Duet/trio performance",
+              "Solo choreography (based on choreographic task)",
+            ],
+          },
+          {
+            name: "Component 2: Dance Appreciation",
+            duration: "1 hour 30 minutes",
+            marks: 80,
+            percentage: 40,
+            content: [
+              "Knowledge and understanding of choreographic processes and performance skills",
+              "Critical appreciation of own work",
+              "Critical appreciation of professional works",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Set phrases: six choreographed phrases to learn and perform",
+          "Actions: travel, turn, elevation, gesture, stillness, transfer of weight",
+          "Dynamics: speed, flow, weight, quality of movement",
+          "Choreographic devices: motif, development, contrast, climax, highlights",
+          "Dance for camera and site-sensitive dance",
+          "Professional works: detailed study of anthology works",
+          "Safe practice: warm-up, cool-down, nutrition, injury prevention",
+          "Dance styles and practitioners",
+        ],
+      },
+    ],
+  },
+
+  // CITIZENSHIP
+  {
+    name: "Citizenship Studies",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8100",
+        papers: [
+          {
+            name: "Paper 1: Active Citizenship",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: [
+              "Citizenship action - investigating, planning, action, evaluation",
+              "Politics and participation",
+            ],
+          },
+          {
+            name: "Paper 2: Citizenship",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: [
+              "Life in modern Britain",
+              "Rights and responsibilities",
+              "Law and the justice system",
+            ],
+          },
+        ],
+        keyTopics: [
+          "Democracy and government: Parliament, elections, political parties",
+          "The UK constitution and monarchy",
+          "Rights and responsibilities: human rights, legal rights",
+          "The justice system: courts, criminal vs civil law, young offenders",
+          "Identity and diversity in the UK",
+          "The media and free press",
+          "The UK's role in the world: UN, NATO, EU, Commonwealth",
+          "Taking citizenship action: investigating issues, campaigning",
+        ],
+      },
+    ],
+  },
+
+  // STATISTICS
+  {
+    name: "Statistics",
+    examBoards: [
+      {
+        boardId: "edexcel",
+        specCode: "1ST0",
+        papers: [
+          {
+            name: "Paper 1",
+            duration: "1 hour 30 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Collection of data", "Processing, representing and analysing data", "Probability"],
+          },
+          {
+            name: "Paper 2",
+            duration: "1 hour 30 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Collection of data", "Processing, representing and analysing data", "Probability"],
+          },
+        ],
+        keyTopics: [
+          "Data collection: sampling methods, questionnaires, experiments",
+          "Types of data: primary/secondary, qualitative/quantitative, discrete/continuous",
+          "Representing data: histograms, cumulative frequency, box plots",
+          "Averages: mean, median, mode from tables and grouped data",
+          "Spread: range, IQR, standard deviation",
+          "Correlation and regression: scatter diagrams, line of best fit",
+          "Index numbers and time series",
+          "Probability: tree diagrams, Venn diagrams, conditional probability",
+        ],
+      },
+    ],
+  },
+
+  // ASTRONOMY
+  {
+    name: "Astronomy",
+    examBoards: [
+      {
+        boardId: "edexcel",
+        specCode: "1AS0",
+        papers: [
+          {
+            name: "Paper 1: Naked Eye Astronomy",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Planet Earth", "The Moon and the Sun", "The night sky", "Planetary systems"],
+          },
+          {
+            name: "Paper 2: Telescopic Astronomy",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Exploring the solar system", "Stars", "Galaxies", "Cosmology"],
+          },
+        ],
+        keyTopics: [
+          "Earth's rotation, seasons, time zones",
+          "Moon: phases, eclipses, tides",
+          "Solar system: planets, dwarf planets, comets, asteroids",
+          "Constellations and star patterns",
+          "Telescopes: types, resolution, magnification",
+          "Stellar evolution: life cycle of stars, HR diagram",
+          "Galaxies: types, Milky Way structure",
+          "Big Bang theory, expansion of universe, dark matter/energy",
+        ],
+      },
+    ],
+  },
+
+  // LATIN
+  {
+    name: "Latin",
+    examBoards: [
+      {
+        boardId: "ocr",
+        specCode: "J282",
+        papers: [
+          {
+            name: "Language (Latin)",
+            duration: "1 hour 30 minutes",
+            marks: 100,
+            percentage: 50,
+            content: ["Translation from Latin", "Comprehension", "Grammar questions"],
+          },
+          {
+            name: "Literature (Prose and Verse)",
+            duration: "1 hour",
+            marks: 50,
+            percentage: 25,
+            content: ["Study of prescribed prose and verse texts"],
+          },
+          {
+            name: "Literature (Sources)",
+            duration: "1 hour",
+            marks: 50,
+            percentage: 25,
+            content: ["Roman Civilisation topics OR Ancient History topics"],
+          },
+        ],
+        keyTopics: [
+          "Latin grammar: cases, tenses, conjugations, participles",
+          "Translation skills: Latin to English",
+          "Defined vocabulary list (400+ words)",
+          "Prescribed texts: prose (e.g., Pliny, Tacitus) and verse (e.g., Virgil, Ovid)",
+          "Literary techniques: scansion, figures of speech",
+          "Roman civilisation: daily life, entertainment, religion, army",
+        ],
+      },
+    ],
+  },
+
+  // FILM STUDIES
+  {
+    name: "Film Studies",
+    examBoards: [
+      {
+        boardId: "wjec",
+        specCode: "C670",
+        papers: [
+          {
+            name: "Component 1: US Film",
+            duration: "1 hour 30 minutes",
+            marks: 60,
+            percentage: 35,
+            content: ["Hollywood 1930-1960 (comparative study)", "Hollywood 1961-1990", "Contemporary US film"],
+          },
+          {
+            name: "Component 2: Global Film",
+            duration: "1 hour 30 minutes",
+            marks: 60,
+            percentage: 35,
+            content: ["Global English-language films", "Non-English language films"],
+          },
+        ],
+        coursework: {
+          name: "Component 3: Production",
+          percentage: 30,
+          description: "Screenplay or short film (3-5 minutes) plus evaluative analysis",
+        },
+        keyTopics: [
+          "Film form: cinematography, mise-en-scene, editing, sound",
+          "Narrative theory: Todorov, Propp, Levi-Strauss",
+          "Genre: conventions, hybrid genres",
+          "Representation: gender, ethnicity, age",
+          "Contexts: social, cultural, political, historical",
+          "US film industry: studio system, stars, New Hollywood",
+          "Global cinema: national cinemas, film movements",
+        ],
+      },
+    ],
+  },
+
+  // ENGINEERING
+  {
+    name: "Engineering",
+    examBoards: [
+      {
+        boardId: "ocr",
+        specCode: "J830",
+        papers: [
+          {
+            name: "R038: Principles of Engineering Design",
+            duration: "1 hour 15 minutes",
+            marks: 60,
+            percentage: 40,
+            content: ["Engineering sectors", "Design strategies", "Engineering materials", "Production techniques"],
+          },
+        ],
+        coursework: {
+          name: "R039-R043 (Specialist Units)",
+          percentage: 60,
+          description: "Coursework units: Communicating designs, Creating electronic products, Responding to briefs, Using CAD, Creating engineered products",
+        },
+        keyTopics: [
+          "Engineering sectors: mechanical, electrical, aerospace, civil",
+          "Design process: briefs, specifications, iteration",
+          "Materials: metals, polymers, composites - properties and uses",
+          "Manufacturing processes: cutting, shaping, joining, finishing",
+          "Engineering drawings and CAD",
+          "Electronics: components, circuits, inputs/outputs",
+          "Quality control and testing",
+          "Health and safety in engineering",
+        ],
+      },
+    ],
+  },
+
+  // FURTHER MATHS (often Level 2)
+  {
+    name: "Further Maths (Level 2)",
+    examBoards: [
+      {
+        boardId: "aqa",
+        specCode: "8365",
+        papers: [
+          {
+            name: "Paper 1 (Non-Calculator)",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Pure mathematics", "Statistics"],
+          },
+          {
+            name: "Paper 2 (Calculator)",
+            duration: "1 hour 45 minutes",
+            marks: 80,
+            percentage: 50,
+            content: ["Pure mathematics", "Mechanics"],
+          },
+        ],
+        keyTopics: [
+          "Algebra: factor theorem, algebraic fractions, functions",
+          "Coordinate geometry: circles, parametric equations",
+          "Calculus: differentiation, integration (basics)",
+          "Matrices: operations, transformations",
+          "Trigonometry: identities, sine and cosine rules, radians",
+          "Statistics: binomial distribution, hypothesis testing",
+          "Mechanics: kinematics, forces, Newton's laws, momentum",
+          "Sequences: arithmetic, geometric, sigma notation",
+        ],
+      },
+    ],
+  },
 ];
 
 // Command words used in GCSE exams
