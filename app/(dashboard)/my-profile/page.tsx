@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LearningTools } from "@/components/profile/learning-tools";
+import { FullLearningProfile } from "@/components/profile/full-learning-profile";
+import { generateLearningProfile } from "@/lib/learning-profile";
 
 export default async function MyProfilePage() {
   const supabase = await createClient();
@@ -96,6 +98,9 @@ export default async function MyProfilePage() {
 
   const dominant = styleInfo[dominantStyle] || styleInfo.visual;
 
+  // Generate the full learning profile
+  const fullProfile = generateLearningProfile(varkProfile);
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Header */}
@@ -153,6 +158,9 @@ export default async function MyProfilePage() {
 
       {/* Learning Tools Component */}
       <LearningTools varkProfile={varkProfile} />
+
+      {/* Full Personalized Learning Profile */}
+      <FullLearningProfile profile={fullProfile} />
 
       {/* Recommended Techniques */}
       <Card>
