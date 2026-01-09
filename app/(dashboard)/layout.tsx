@@ -54,6 +54,12 @@ export default async function DashboardLayout({
             >
               History
             </Link>
+            <Link
+              href="/revision-ai"
+              className="text-blue-600 hover:text-blue-700 font-medium transition"
+            >
+              RevisionAI
+            </Link>
             <div className="flex items-center gap-4">
               <span className="text-sm text-slate-600">
                 {profile?.first_name || user.email}

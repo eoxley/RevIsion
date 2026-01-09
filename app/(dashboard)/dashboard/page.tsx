@@ -129,6 +129,30 @@ export default async function DashboardPage() {
         </Card>
       )}
 
+      {/* RevisionAI CTA */}
+      {latestResult && (
+        <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0">
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-4xl">🤖</div>
+                <div>
+                  <h3 className="text-xl font-bold">RevisionAI</h3>
+                  <p className="text-purple-100">
+                    Get personalized study advice from your AI coach
+                  </p>
+                </div>
+              </div>
+              <Link href="/revision-ai">
+                <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  Chat Now
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* CTA */}
       <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
         <CardContent className="py-8 text-center">
