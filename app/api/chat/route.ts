@@ -1,6 +1,7 @@
 import { OpenAI } from "openai";
 import { NextRequest } from "next/server";
 import { getCurriculumSummary, examBoards, subjects, commandWords, gradeBoundaries, revisionTimeline2026 } from "@/lib/curriculum-data";
+import { pastPaperSources, allQuestionBanks, timingGuide, commandWordQuestions } from "@/lib/question-bank";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -99,12 +100,41 @@ SUBJECTS YOU HAVE DETAILED KNOWLEDGE OF:
 - English Literature (AQA 8702)
 - Combined Science Trilogy (AQA 8464)
 - Separate Sciences: Biology (8461), Chemistry (8462), Physics (8463)
-- History (AQA 8145, Edexcel 1HI0)
-- Geography (AQA 8035)
-- Computer Science (OCR J277, AQA 8525)
-- Religious Studies (AQA 8062)
-- French (AQA 8658), Spanish (AQA 8698)
-- Art and Design, PE, Drama, Music, D&T
+- History (AQA 8145, Edexcel 1HI0), Geography (AQA 8035)
+- Computer Science (OCR J277, AQA 8525), Religious Studies (AQA 8062)
+- French (AQA 8658), Spanish (AQA 8698), German (AQA 8668)
+- Business (AQA 8132, Edexcel 1BS0), Economics, Psychology, Sociology
+- Media Studies, Food Prep & Nutrition, Health & Social Care
+- Art, PE, Drama, Music, D&T, Dance, Citizenship, Statistics, Latin
+
+═══════════════════════════════════════════════════════════
+PAST PAPERS & QUESTION RESOURCES
+═══════════════════════════════════════════════════════════
+FREE PAST PAPER SOURCES (always recommend these):
+- AQA: aqa.org.uk/find-past-papers-and-mark-schemes (2018+)
+- Edexcel: qualifications.pearson.com/past-papers (2017+)
+- OCR: ocr.org.uk/qualifications/past-paper-finder/ (free registration)
+- WJEC: wjec.co.uk/qualifications/past-papers/
+
+TOPIC-ORGANISED QUESTIONS:
+- Physics & Maths Tutor (physicsandmathstutor.com) - best for topic questions
+- Corbettmaths (maths only) - worksheets by topic
+- Seneca Learning (free tier) - categorised quizzes
+
+QUESTION TYPE KNOWLEDGE:
+You know how to answer every type of GCSE question:
+- Maths: Standard calculations, multi-step problems, prove/show that, problem solving
+- English: Retrieval (AO1), Language analysis (AO2), Structure, Evaluation, Writing tasks
+- Science: Define, Describe, Explain, Calculate, Compare, Evaluate, 6-mark extended, Required Practicals
+- History: Inference, Source utility, Compare sources, Essay questions, Narrative accounts
+- Geography: Pattern description, Explain, Evaluate, 9-mark essays, Fieldwork questions
+
+EXAM TECHNIQUE TO TEACH:
+- ${timingGuide.general}
+- Command words: State=facts, Describe=what happens, Explain=why/how, Evaluate=judge, Compare=similarities+differences
+- Always show working in calculations
+- Quote sources/texts when analysing
+- Plan essays before writing
 
 ALWAYS ASK for their exam board if giving subject-specific advice to ensure accuracy.`;
 
