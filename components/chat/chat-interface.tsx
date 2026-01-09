@@ -40,12 +40,14 @@ export function ChatInterface({ varkProfile }: ChatInterfaceProps) {
   useEffect(() => {
     if (messages.length === 0) {
       const greeting = varkProfile
-        ? `Hi! I'm your personal revision coach. I can see you're ${
+        ? `Hi! I'm your personal GCSE revision coach for the 2026 exams. I can see you're ${
             varkProfile.isMultimodal
               ? "a multimodal learner"
               : `primarily a ${varkProfile.primaryStyles[0]?.replace("_", "/")} learner`
-          }. I'll tailor all my study advice to match how you learn best. What subject or topic would you like help revising today?`
-        : "Hi! I'm your revision coach. To give you personalized study advice, please take the VARK assessment first. But feel free to ask me any general study questions!";
+          }. I'll tailor all my revision advice to match how you learn best.
+
+What GCSE subject would you like help with? Just let me know the subject and your exam board (AQA, Edexcel, OCR, etc.) and I'll give you personalised revision strategies!`
+        : "Hi! I'm your GCSE revision coach for the 2026 exams. To give you personalised study advice, please take the VARK assessment first. But feel free to ask me any general GCSE revision questions!";
 
       setMessages([{ role: "assistant", content: greeting }]);
     }
@@ -120,15 +122,15 @@ export function ChatInterface({ varkProfile }: ChatInterfaceProps) {
 
   const suggestedPrompts = varkProfile
     ? [
-        "Create a revision plan for my exams",
-        "How should I study for biology?",
-        "Help me memorize vocabulary",
-        "Best way to prepare for a math test",
+        "Create a GCSE revision timetable",
+        "Help me revise AQA Biology Paper 1",
+        "How do I get a grade 9 in Maths?",
+        "Explain English Literature exam technique",
       ]
     : [
-        "General study tips",
-        "How to stay focused",
-        "Time management for students",
+        "What are the best GCSE revision techniques?",
+        "How should I prepare for 2026 exams?",
+        "Help me choose revision resources",
       ];
 
   return (

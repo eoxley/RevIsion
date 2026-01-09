@@ -41,7 +41,7 @@ export default async function RevisionAIPage() {
       <div>
         <h1 className="text-3xl font-bold text-slate-900">RevisionAI</h1>
         <p className="text-slate-600 mt-1">
-          Your personal AI study coach, tailored to your learning style
+          Your personal GCSE 2026 revision coach, tailored to your learning style
         </p>
       </div>
 
@@ -121,24 +121,24 @@ export default async function RevisionAIPage() {
       {/* Tips Section */}
       <div className="grid md:grid-cols-3 gap-4">
         <Card className="p-4">
-          <div className="text-2xl mb-2">📚</div>
-          <h3 className="font-medium mb-1">Study Plans</h3>
+          <div className="text-2xl mb-2">📅</div>
+          <h3 className="font-medium mb-1">GCSE Timetables</h3>
           <p className="text-sm text-slate-600">
-            Ask for a revision schedule tailored to your exams
+            Get revision schedules for May-June 2026 exams
+          </p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-2xl mb-2">📝</div>
+          <h3 className="font-medium mb-1">Exam Technique</h3>
+          <p className="text-sm text-slate-600">
+            Learn command words and mark scheme secrets
           </p>
         </Card>
         <Card className="p-4">
           <div className="text-2xl mb-2">🎯</div>
-          <h3 className="font-medium mb-1">Subject Help</h3>
+          <h3 className="font-medium mb-1">Grade 9 Tips</h3>
           <p className="text-sm text-slate-600">
-            Get specific techniques for any subject
-          </p>
-        </Card>
-        <Card className="p-4">
-          <div className="text-2xl mb-2">💡</div>
-          <h3 className="font-medium mb-1">Memory Tips</h3>
-          <p className="text-sm text-slate-600">
-            Learn memorization strategies for your style
+            Strategies to reach the top grades in any subject
           </p>
         </Card>
       </div>
