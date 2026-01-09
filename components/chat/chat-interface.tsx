@@ -120,18 +120,49 @@ What GCSE subject would you like help with? Just let me know the subject and you
     }
   };
 
-  const suggestedPrompts = varkProfile
-    ? [
-        "Create a GCSE revision timetable",
-        "Help me revise AQA Biology Paper 1",
-        "How do I get a grade 9 in Maths?",
-        "Explain English Literature exam technique",
-      ]
-    : [
+  // Generate personalized prompts based on VARK profile
+  const getSuggestedPrompts = () => {
+    if (!varkProfile) {
+      return [
         "What are the best GCSE revision techniques?",
         "How should I prepare for 2026 exams?",
         "Help me choose revision resources",
       ];
+    }
+
+    const primaryStyle = varkProfile.primaryStyles[0];
+
+    const stylePrompts: Record<string, string[]> = {
+      visual: [
+        "Create a visual revision timetable for my GCSEs",
+        "Best mind mapping techniques for Biology",
+        "How do I use diagrams to revise Chemistry?",
+        "Recommend YouTube channels for GCSE revision",
+      ],
+      auditory: [
+        "Create a revision plan I can discuss with friends",
+        "Best podcasts and audio resources for GCSEs",
+        "How do I memorize quotes by saying them aloud?",
+        "Tips for study groups and discussion revision",
+      ],
+      read_write: [
+        "Create a detailed written revision schedule",
+        "How do I take better notes for GCSE English?",
+        "Best revision guides and textbooks to buy",
+        "How to use mark schemes effectively",
+      ],
+      kinesthetic: [
+        "Create a hands-on revision plan with past papers",
+        "How do I revise while staying active?",
+        "Best practice techniques for GCSE Maths",
+        "How to do timed exam practice effectively",
+      ],
+    };
+
+    return stylePrompts[primaryStyle] || stylePrompts.visual;
+  };
+
+  const suggestedPrompts = getSuggestedPrompts();
 
   return (
     <div className="flex flex-col h-[600px] bg-white rounded-xl border border-slate-200 shadow-sm">
