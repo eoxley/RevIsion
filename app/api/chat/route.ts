@@ -1,5 +1,6 @@
 import { OpenAI } from "openai";
 import { NextRequest } from "next/server";
+import { getCurriculumSummary, examBoards, subjects, commandWords, gradeBoundaries, revisionTimeline2026 } from "@/lib/curriculum-data";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -53,14 +54,59 @@ interface VARKProfile {
 }
 
 function createSystemPrompt(varkProfile: VARKProfile | null) {
+  // Get live curriculum data
+  const curriculumSummary = getCurriculumSummary();
+
+  // Build exam board specific info
+  const examBoardInfo = examBoards.map(b =>
+    `${b.name} (${b.fullName}): Exams ${b.keyDates2026.examStart} - ${b.keyDates2026.examEnd}, Results: ${b.keyDates2026.resultsDay}`
+  ).join("\n");
+
+  // Build command words reference
+  const commandWordsList = Object.entries(commandWords)
+    .slice(0, 10)
+    .map(([word, info]) => `- ${word}: ${info.meaning}`)
+    .join("\n");
+
+  // Current revision phase based on timeline
+  const currentPhase = revisionTimeline2026.january2026;
+
   const basePrompt = `You are RevisionAI, a friendly and expert GCSE revision coach specializing in the UK GCSE 2026 curriculum.
 
-UK GCSE 2026 EXPERTISE:
-- All exam boards: AQA, Edexcel, OCR, WJEC specifications and requirements
-- 9-1 grading: 9 highest, 4 standard pass, 5 strong pass
-- All subjects: English, Maths, Sciences, Languages, Humanities, Arts, etc.
-- Exam dates: May-June 2026
-- Resources: CGP, Seneca, BBC Bitesize, GCSE Pod, Cognito, FreeScienceLessons`;
+═══════════════════════════════════════════════════════════
+UK GCSE 2026 LIVE CURRICULUM DATA
+═══════════════════════════════════════════════════════════
+${curriculumSummary}
+
+EXAM BOARDS & KEY DATES:
+${examBoardInfo}
+
+CURRENT REVISION PHASE (January 2026):
+${currentPhase}
+
+GRADE BOUNDARIES (approximate):
+Grade 9: ~85%+ (exceptional)
+Grade 7: ~65-74% (old A grade)
+Grade 5: ~45-54% (strong pass)
+Grade 4: ~35-44% (standard pass)
+
+COMMAND WORDS TO TEACH STUDENTS:
+${commandWordsList}
+
+SUBJECTS YOU HAVE DETAILED KNOWLEDGE OF:
+- Mathematics (AQA 8300, Edexcel 1MA1)
+- English Language (AQA 8700, Edexcel 1EN0)
+- English Literature (AQA 8702)
+- Combined Science Trilogy (AQA 8464)
+- Separate Sciences: Biology (8461), Chemistry (8462), Physics (8463)
+- History (AQA 8145, Edexcel 1HI0)
+- Geography (AQA 8035)
+- Computer Science (OCR J277, AQA 8525)
+- Religious Studies (AQA 8062)
+- French (AQA 8658), Spanish (AQA 8698)
+- Art and Design, PE, Drama, Music, D&T
+
+ALWAYS ASK for their exam board if giving subject-specific advice to ensure accuracy.`;
 
   if (!varkProfile) {
     return `${basePrompt}
