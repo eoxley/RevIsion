@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { PersistentChat } from "@/components/chat/persistent-chat";
 import {
   ProgressSidebar,
@@ -49,6 +50,28 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  // Fetch student's enrolled subjects
+  const { data: studentSubjects } = await supabase
+    .from("student_subjects")
+    .select(
+      `
+      *,
+      subjects (
+        id,
+        code,
+        display_name,
+        category
+      )
+    `
+    )
+    .eq("student_id", user.id)
+    .order("priority_level", { ascending: true });
+
+  // Redirect to onboarding if no subjects selected
+  if (!studentSubjects || studentSubjects.length === 0) {
+    redirect("/onboarding");
+  }
+
   // Fetch latest learning style result
   const { data: latestResult } = await supabase
     .from("results")
@@ -70,22 +93,10 @@ export default async function DashboardPage() {
       }
     : null;
 
-  // Fetch student's enrolled subjects
-  const { data: studentSubjects } = await supabase
-    .from("student_subjects")
-    .select(
-      `
-      *,
-      subjects (
-        id,
-        code,
-        display_name,
-        category
-      )
-    `
-    )
-    .eq("student_id", user.id)
-    .order("priority_level", { ascending: true });
+  // Extract subject names for chat context
+  const subjectNames = studentSubjects?.map(
+    (ss: { subjects: { display_name: string } }) => ss.subjects.display_name
+  ) || [];
 
   // Count completed sessions
   const { count: sessionCount } = await supabase
@@ -136,7 +147,11 @@ export default async function DashboardPage() {
 
         {/* Chat Interface - Primary Surface */}
         <div className="flex-1">
-          <PersistentChat learningProfile={learningProfile} studentName={studentName} />
+          <PersistentChat
+            learningProfile={learningProfile}
+            studentName={studentName}
+            subjects={subjectNames}
+          />
         </div>
       </main>
 

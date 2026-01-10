@@ -48,11 +48,13 @@ interface LearningProfile {
 interface PersistentChatProps {
   learningProfile: LearningProfile | null;
   studentName?: string;
+  subjects?: string[];
 }
 
 export function PersistentChat({
   learningProfile,
   studentName,
+  subjects = [],
 }: PersistentChatProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -294,6 +296,7 @@ What do you need help with?`;
                 isMultimodal: learningProfile.isMultimodal,
               }
             : null,
+          selectedSubjects: subjects,
         }),
       });
 
@@ -430,7 +433,7 @@ What do you need help with?`;
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // AUDIO PLAYBACK (Text-to-Speech)
+  // AUDIO PLAYBACK (Text-to-Speech via ElevenLabs)
   // ═══════════════════════════════════════════════════════════════
 
   async function playMessageAudio(messageIndex: number, text: string) {
@@ -448,22 +451,35 @@ What do you need help with?`;
     setPlayingMessageIndex(messageIndex);
 
     try {
-      const response = await fetch("/api/speech/synthesize", {
+      // Try ElevenLabs first (better quality UK voices)
+      let response = await fetch("/api/speech/elevenlabs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text,
-          voice: "default",
-          speakingRate: 0.95,
+          voice: "lily", // Young British female
         }),
       });
+
+      // Fallback to Google TTS if ElevenLabs fails
+      if (!response.ok) {
+        response = await fetch("/api/speech/synthesize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text,
+            voice: "default",
+            speakingRate: 0.95,
+          }),
+        });
+      }
 
       if (!response.ok) throw new Error("Synthesis failed");
 
       const data = await response.json();
 
       if (data.audioContent) {
-        const audioSrc = `data:audio/mp3;base64,${data.audioContent}`;
+        const audioSrc = `data:audio/mpeg;base64,${data.audioContent}`;
         const audio = new Audio(audioSrc);
         audioRef.current = audio;
 
@@ -531,6 +547,7 @@ What do you need help with?`;
                 isMultimodal: learningProfile.isMultimodal,
               }
             : null,
+          selectedSubjects: subjects,
         }),
       });
 
