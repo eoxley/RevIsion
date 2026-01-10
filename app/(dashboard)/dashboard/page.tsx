@@ -46,6 +46,15 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  // Fetch latest learning style result first
+  const { data: latestResult } = await supabase
+    .from("results")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("calculated_at", { ascending: false })
+    .limit(1)
+    .single();
+
   // Fetch student's enrolled subjects
   const { data: studentSubjects } = await supabase
     .from("student_subjects")
@@ -63,19 +72,13 @@ export default async function DashboardPage() {
     .eq("student_id", user.id)
     .order("priority_level", { ascending: true });
 
-  // Redirect to onboarding if no subjects selected
-  if (!studentSubjects || studentSubjects.length === 0) {
+  // Only redirect to onboarding if truly not started (no learning style AND no subjects)
+  const hasLearningStyle = !!latestResult;
+  const hasSubjects = studentSubjects && studentSubjects.length > 0;
+
+  if (!hasLearningStyle && !hasSubjects) {
     redirect("/onboarding");
   }
-
-  // Fetch latest learning style result
-  const { data: latestResult } = await supabase
-    .from("results")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("calculated_at", { ascending: false })
-    .limit(1)
-    .single();
 
   // Build learning profile if available
   const learningProfile = latestResult

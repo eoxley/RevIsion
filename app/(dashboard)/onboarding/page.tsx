@@ -60,9 +60,9 @@ export default async function OnboardingPage() {
   const hasSubjects = currentSubjects.length > 0;
   const hasLearningStyle = !!result;
 
-  // If subjects and learning style complete, redirect to dashboard
-  // (don't require child name for existing users who completed before parent flow)
-  if (hasSubjects && hasLearningStyle) {
+  // If learning style is complete, redirect to dashboard
+  // (learning style is the final step, so if done, onboarding is complete)
+  if (hasLearningStyle) {
     redirect("/dashboard");
   }
 
