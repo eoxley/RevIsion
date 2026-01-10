@@ -35,6 +35,11 @@ interface StudentSubject {
   priority_level?: string;
   last_studied_at?: string | null;
   subjects: Subject;
+  // Progress fields from revision_progress aggregation
+  progress_percentage?: number;
+  understanding_level?: string;
+  topics_covered?: number;
+  topics_total?: number;
 }
 
 interface LearningProfile {
@@ -189,21 +194,30 @@ function LearningStyleBar({
   );
 }
 
+// Understanding level colors (matches SubjectCards)
+const UNDERSTANDING_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
+  not_started: { bg: "bg-neutral-100", text: "text-neutral-500", bar: "bg-neutral-300" },
+  building: { bg: "bg-amber-50", text: "text-amber-600", bar: "bg-amber-400" },
+  strengthening: { bg: "bg-blue-50", text: "text-blue-600", bar: "bg-blue-400" },
+  secure: { bg: "bg-revision-green-50", text: "text-revision-green-600", bar: "bg-revision-green-500" },
+};
+
 /**
- * Subject card showing name and exam board
+ * Subject card showing name, progress, and understanding level
+ * Progress data comes from revision_progress aggregation (not student_subjects)
  */
 function SubjectCard({ studentSubject }: { studentSubject: StudentSubject }) {
-  const { subjects: subject, exam_board, priority_level, last_studied_at } =
-    studentSubject;
+  const {
+    subjects: subject,
+    exam_board,
+    last_studied_at,
+    progress_percentage,
+    understanding_level,
+  } = studentSubject;
 
-  // Priority indicator - uses neutral and green only
-  const priorityStyles: Record<string, string> = {
-    critical: "bg-revision-green-100 text-revision-green-700",
-    high: "bg-revision-green-50 text-revision-green-600",
-    medium: "bg-neutral-100 text-neutral-600",
-    low: "bg-neutral-50 text-neutral-500",
-    maintenance: "bg-revision-green-50 text-revision-green-600",
-  };
+  const progress = progress_percentage || 0;
+  const understanding = understanding_level || "not_started";
+  const colors = UNDERSTANDING_COLORS[understanding] || UNDERSTANDING_COLORS.not_started;
 
   return (
     <div className="p-3 rounded-lg border border-neutral-200 hover:border-revision-green-300 transition bg-white">
@@ -216,21 +230,34 @@ function SubjectCard({ studentSubject }: { studentSubject: StudentSubject }) {
             <p className="text-xs text-neutral-500">{exam_board}</p>
           )}
         </div>
-        {priority_level && (
+        {understanding !== "not_started" && (
           <span
             className={cn(
               "text-xs px-2 py-0.5 rounded-full",
-              priorityStyles[priority_level] || priorityStyles.medium
+              colors.bg,
+              colors.text
             )}
           >
-            {priority_level === "maintenance"
-              ? "Strong"
-              : priority_level === "critical"
-                ? "Focus"
-                : null}
+            {understanding === "building" && "Building"}
+            {understanding === "strengthening" && "Strengthening"}
+            {understanding === "secure" && "Secure"}
           </span>
         )}
       </div>
+
+      {/* Progress bar - derived from revision_progress */}
+      {progress > 0 && (
+        <div className="mt-2">
+          <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+            <div
+              className={cn("h-full rounded-full transition-all", colors.bar)}
+              style={{ width: `${Math.max(progress, 2)}%` }}
+            />
+          </div>
+          <p className={cn("text-xs mt-1", colors.text)}>{progress}% secure</p>
+        </div>
+      )}
+
       {last_studied_at && (
         <p className="text-xs text-neutral-400 mt-2">
           Last studied:{" "}

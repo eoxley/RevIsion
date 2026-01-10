@@ -147,12 +147,31 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-neutral-900 text-neutral-400">
-        <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[#4A7C9B] font-semibold">my</span>
-            <span className="text-[#3AAA8A] font-semibold">revisionary</span>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-[#4A7C9B] font-semibold">my</span>
+              <span className="text-[#3AAA8A] font-semibold">revisionary</span>
+            </div>
+
+            {/* Legal Links */}
+            <nav className="flex flex-wrap justify-center gap-4 md:gap-6 text-sm">
+              <Link href="/privacy" className="hover:text-white transition">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-white transition">
+                Terms
+              </Link>
+              <Link href="/cookies" className="hover:text-white transition">
+                Cookies
+              </Link>
+              <Link href="/accessibility" className="hover:text-white transition">
+                Accessibility
+              </Link>
+            </nav>
+
+            <p className="text-sm">&copy; 2025 myrevisionary</p>
           </div>
-          <p className="text-sm">&copy; 2025 myrevisionary. Helping students learn smarter.</p>
         </div>
 
         {/* Company Info Banner */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PersistentChat } from "@/components/chat/persistent-chat";
 import {
   ProgressSidebar,
@@ -8,6 +8,17 @@ import {
 } from "@/components/dashboard/progress-sidebar";
 import { SubjectCards } from "@/components/dashboard/subject-cards";
 import Link from "next/link";
+
+interface AggregatedProgress {
+  subject_id: string;
+  secure_count: number;
+  strengthening_count: number;
+  building_count: number;
+  total_topics: number;
+  progress_percentage: number;
+  understanding_level: "not_started" | "building" | "strengthening" | "secure";
+  last_interaction_at: string | null;
+}
 
 /**
  * Dashboard Client Component
@@ -80,6 +91,39 @@ export function DashboardClient({
   sessionCount,
 }: DashboardClientProps) {
   const [subjectContext, setSubjectContext] = useState<SubjectContext | null>(null);
+  const [progressData, setProgressData] = useState<AggregatedProgress[]>([]);
+
+  // Fetch live progress from revision_progress table
+  useEffect(() => {
+    async function fetchProgress() {
+      try {
+        const res = await fetch("/api/progress/subjects");
+        if (res.ok) {
+          const data = await res.json();
+          setProgressData(data.progress || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch progress:", error);
+      }
+    }
+    fetchProgress();
+  }, []);
+
+  // Merge progress data with student subjects
+  const subjectsWithProgress = studentSubjects.map((ss) => {
+    const progress = progressData.find((p) => p.subject_id === ss.subject_id);
+    if (progress) {
+      return {
+        ...ss,
+        progress_percentage: progress.progress_percentage,
+        understanding_level: progress.understanding_level,
+        topics_covered: progress.secure_count + progress.strengthening_count,
+        topics_total: progress.total_topics,
+        last_studied_at: progress.last_interaction_at || ss.last_studied_at,
+      };
+    }
+    return ss;
+  });
 
   // Handle subject card click
   function handleSubjectClick(subjectCode: string, resumeContext: ResumeContext) {
@@ -149,9 +193,9 @@ export function DashboardClient({
                 Edit subjects
               </Link>
             </div>
-            {studentSubjects.length > 0 ? (
+            {subjectsWithProgress.length > 0 ? (
               <SubjectCards
-                studentSubjects={studentSubjects}
+                studentSubjects={subjectsWithProgress}
                 onSubjectClick={handleSubjectClick}
               />
             ) : (
@@ -184,7 +228,7 @@ export function DashboardClient({
       {/* Progress Sidebar - Desktop only */}
       <div className="hidden lg:block">
         <ProgressSidebar
-          studentSubjects={studentSubjects}
+          studentSubjects={subjectsWithProgress}
           learningProfile={learningProfile}
           sessionCount={sessionCount}
           studentName={studentName}
