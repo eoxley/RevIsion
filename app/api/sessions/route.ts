@@ -26,7 +26,21 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { session_type = "freeform", primary_subject_id } = body;
+    const { session_type = "freeform", primary_subject_id, subject_code } = body;
+
+    // If subject_code is provided, look up the subject ID
+    let resolvedSubjectId = primary_subject_id;
+    if (subject_code && !primary_subject_id) {
+      const { data: subject } = await supabase
+        .from("subjects")
+        .select("id")
+        .eq("code", subject_code.toUpperCase())
+        .single();
+
+      if (subject) {
+        resolvedSubjectId = subject.id;
+      }
+    }
 
     // Create new session
     const { data: session, error } = await supabase
@@ -34,7 +48,7 @@ export async function POST(request: Request) {
       .insert({
         student_id: user.id,
         session_type,
-        primary_subject_id,
+        primary_subject_id: resolvedSubjectId,
         agent_phase: "greeting",
         completion_status: "in_progress",
       })

@@ -73,6 +73,7 @@ export function PersistentChat({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [sessionError, setSessionError] = useState<string | null>(null);
 
   // Voice input state
   const [isRecording, setIsRecording] = useState(false);
@@ -108,6 +109,7 @@ export function PersistentChat({
   // Initialize session and load messages
   useEffect(() => {
     async function initializeChat() {
+      setSessionError(null);
       try {
         // If we have subject context, start a fresh subject-focused session
         if (subjectContext) {
@@ -115,15 +117,23 @@ export function PersistentChat({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              session_type: "subject_focused",
+              session_type: "learning",
               subject_code: subjectContext.subjectCode,
             }),
           });
           const newSessionData = await newSessionRes.json();
 
+          if (newSessionData.error) {
+            console.error("Session creation error:", newSessionData.error);
+            setSessionError("Failed to start session. Please refresh.");
+            return;
+          }
+
           if (newSessionData.session) {
             setSession(newSessionData.session);
             addSubjectGreeting(newSessionData.session.id, subjectContext);
+          } else {
+            setSessionError("Failed to create session. Please refresh.");
           }
           return;
         }
@@ -131,6 +141,12 @@ export function PersistentChat({
         // Normal initialization - check for existing session
         const sessionsRes = await fetch("/api/sessions");
         const sessionsData = await sessionsRes.json();
+
+        if (sessionsData.error) {
+          console.error("Sessions fetch error:", sessionsData.error);
+          setSessionError("Failed to load session. Please refresh.");
+          return;
+        }
 
         if (sessionsData.activeSession) {
           setSession(sessionsData.activeSession);
@@ -152,13 +168,22 @@ export function PersistentChat({
           });
           const newSessionData = await newSessionRes.json();
 
+          if (newSessionData.error) {
+            console.error("Session creation error:", newSessionData.error);
+            setSessionError("Failed to start session. Please refresh.");
+            return;
+          }
+
           if (newSessionData.session) {
             setSession(newSessionData.session);
             addGreeting(newSessionData.session.id);
+          } else {
+            setSessionError("Failed to create session. Please refresh.");
           }
         }
       } catch (error) {
         console.error("Failed to initialize chat:", error);
+        setSessionError("Connection error. Please check your internet and refresh.");
       } finally {
         setIsInitializing(false);
       }
@@ -734,6 +759,27 @@ What do you need help with?`;
     );
   }
 
+  if (sessionError) {
+    return (
+      <div className="flex flex-col h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-center px-4">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-sm text-neutral-600">{sessionError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-revision-green-500 hover:bg-revision-green-600 text-white text-sm rounded-lg transition"
+            >
+              Refresh page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm">
       {/* Hidden file input */}
@@ -995,7 +1041,8 @@ What do you need help with?`;
               !input.trim() ||
               isRecording ||
               isTranscribing ||
-              isProcessingImage
+              isProcessingImage ||
+              !session
             }
             className="bg-revision-green-500 hover:bg-revision-green-600 text-white"
           >
