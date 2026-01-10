@@ -1,36 +1,28 @@
 /**
- * Controlled Revision API
+ * Unified Revision API (Combined Agent)
  *
- * This API uses the Revision Session Controller (RSC) to enforce
- * structured revision sessions.
- *
- * The controller decides WHAT happens.
- * The LLM decides HOW it is said.
+ * Uses a single LLM call for both evaluation and tutoring.
  *
  * Flow:
- * 1. Evaluate student answer
- * 2. Update session state
- * 3. Determine next action
- * 4. Generate constrained LLM response
+ * 1. Load session state
+ * 2. Call combined agent (evaluates + tutors in one call)
+ * 3. Update state based on evaluation
+ * 4. Stream tutor response
  * 5. Persist everything
  */
 
-import { OpenAI } from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
-  processRevisionTurn,
+  runCombinedAgent,
   initializeSession,
-  getConstrainedSystemPrompt,
-  extractQuestionFromResponse,
+  updateStateFromEvaluation,
+  updateStateWithAction,
+  getPhaseForAction,
   type RevisionSessionState,
   type LearningStyle,
-  type ControllerInput,
-} from "@/lib/revision/controller";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+  type ActionType,
+} from "@/lib/revision";
 
 interface RequestBody {
   message: string;
@@ -41,6 +33,7 @@ interface RequestBody {
   subject_name?: string;
   learning_style?: LearningStyle;
   message_history?: Array<{ role: "user" | "assistant"; content: string }>;
+  mark_scheme?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -66,6 +59,7 @@ export async function POST(req: NextRequest) {
       subject_name,
       learning_style,
       message_history = [],
+      mark_scheme,
     } = body;
 
     // ═══════════════════════════════════════════════════════════
@@ -75,118 +69,113 @@ export async function POST(req: NextRequest) {
     let sessionState = await loadSessionState(supabase, session_id);
 
     if (!sessionState) {
-      // Initialize new session state
       sessionState = initializeSession(
         session_id,
         user.id,
         topic_id || null,
         topic_name || null
       );
-
-      // Persist initial state
       await saveSessionState(supabase, sessionState);
     }
 
     // ═══════════════════════════════════════════════════════════
-    // PROCESS REVISION TURN (CONTROLLER)
+    // RUN COMBINED AGENT (SINGLE LLM CALL)
     // ═══════════════════════════════════════════════════════════
 
-    const controllerInput: ControllerInput = {
-      student_message: message,
-      session_id,
-      current_topic_id: sessionState.topic_id,
-      current_topic_name: sessionState.topic_name,
-      agent_phase: sessionState.phase,
-      session_state: sessionState,
-      message_history: message_history.slice(-10), // Last 10 messages
-      learning_style: learning_style || null,
-      subject_code: subject_code || null,
-      subject_name: subject_name || null,
-    };
-
-    const controllerOutput = await processRevisionTurn(controllerInput);
-
-    // ═══════════════════════════════════════════════════════════
-    // GENERATE CONSTRAINED LLM RESPONSE
-    // ═══════════════════════════════════════════════════════════
-
-    const systemPrompt = getConstrainedSystemPrompt(
-      controllerOutput.llm_instructions
-    );
-
-    // Build messages for LLM
-    const llmMessages = [
-      { role: "system" as const, content: systemPrompt },
-      ...message_history.slice(-6).map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-      { role: "user" as const, content: message },
-    ];
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: llmMessages,
-      stream: true,
-      temperature: 0.7,
-      max_tokens: 500,
+    const result = await runCombinedAgent({
+      question: sessionState.current_question,
+      studentAnswer: message,
+      topicName: sessionState.topic_name || topic_name || null,
+      subjectName: subject_name || null,
+      learningStyle: learning_style || null,
+      attempts: sessionState.attempts,
+      correctStreak: sessionState.correct_streak,
+      markScheme: mark_scheme,
+      messageHistory: message_history.slice(-4),
     });
 
     // ═══════════════════════════════════════════════════════════
-    // STREAM RESPONSE
+    // UPDATE STATE BASED ON EVALUATION
+    // ═══════════════════════════════════════════════════════════
+
+    let updatedState = { ...sessionState };
+
+    // Update state from evaluation (if it's a real evaluation)
+    if (result.evaluation.evaluation !== "unknown") {
+      updatedState = updateStateFromEvaluation(
+        updatedState,
+        result.evaluation.evaluation
+      );
+    }
+
+    // Update state with determined action
+    const phase = getPhaseForAction(result.determinedAction, updatedState.phase);
+    updatedState = updateStateWithAction(
+      updatedState,
+      result.determinedAction,
+      phase
+    );
+
+    // Extract question from tutor response
+    const extractedQuestion = extractQuestionFromMessage(result.tutorMessage);
+    if (extractedQuestion) {
+      updatedState.current_question = extractedQuestion;
+    }
+
+    // Persist updated state
+    await saveSessionState(supabase, updatedState);
+
+    // Log evaluation if it was a real evaluation
+    if (result.evaluation.evaluation !== "unknown") {
+      await logEvaluation(supabase, {
+        session_id,
+        evaluation: result.evaluation,
+        topic_id: sessionState.topic_id,
+        topic_name: sessionState.topic_name,
+        question_asked: sessionState.current_question,
+        student_answer: message,
+        action_taken: result.determinedAction,
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // STREAM TUTOR RESPONSE
     // ═══════════════════════════════════════════════════════════
 
     const encoder = new TextEncoder();
-    let fullResponse = "";
+    const tutorMessage = result.tutorMessage;
 
+    // Create a simple stream that sends the response
     const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of response) {
-            const text = chunk.choices[0]?.delta?.content || "";
-            fullResponse += text;
-            controller.enqueue(encoder.encode(text));
+      start(controller) {
+        // Stream character by character with small delay for natural feel
+        let index = 0;
+        const chunkSize = 3; // Send 3 chars at a time
+
+        const sendChunk = () => {
+          if (index < tutorMessage.length) {
+            const chunk = tutorMessage.slice(index, index + chunkSize);
+            controller.enqueue(encoder.encode(chunk));
+            index += chunkSize;
+            // Use setTimeout for streaming effect
+            setTimeout(sendChunk, 10);
+          } else {
+            controller.close();
           }
+        };
 
-          // After streaming complete, extract question and update state
-          const { question, answerHint } =
-            extractQuestionFromResponse(fullResponse);
-
-          if (question) {
-            controllerOutput.updated_state.current_question = question;
-            controllerOutput.updated_state.expected_answer_hint = answerHint;
-          }
-
-          // Persist updated state
-          await saveSessionState(supabase, controllerOutput.updated_state);
-
-          // Log evaluation if present
-          if (controllerOutput.evaluation) {
-            await logEvaluation(supabase, {
-              session_id,
-              evaluation: controllerOutput.evaluation,
-              topic_id: sessionState.topic_id,
-              topic_name: sessionState.topic_name,
-              question_asked: sessionState.current_question,
-              student_answer: message,
-              action_taken: controllerOutput.next_action,
-            });
-          }
-
-          controller.close();
-        } catch (error) {
-          console.error("Stream error:", error);
-          controller.error(error);
-        }
+        sendChunk();
       },
     });
 
     return new Response(stream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "X-Action": controllerOutput.next_action,
-        "X-Phase": controllerOutput.updated_phase,
-        "X-Evaluation": controllerOutput.evaluation?.evaluation || "none",
+        "X-Action": result.determinedAction,
+        "X-Phase": phase,
+        "X-Evaluation": result.evaluation.evaluation,
+        "X-Confidence": result.evaluation.confidence,
+        "X-Error-Type": result.evaluation.error_type || "none",
       },
     });
   } catch (error) {
@@ -196,6 +185,20 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Extract the last question from a message
+ */
+function extractQuestionFromMessage(message: string): string | null {
+  const sentences = message.split(/(?<=[.!?])\s+/);
+  const questions = sentences.filter((s) => s.trim().endsWith("?"));
+
+  if (questions.length === 0) {
+    return null;
+  }
+
+  return questions[questions.length - 1].trim();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -268,7 +271,7 @@ interface EvaluationLogEntry {
   topic_name: string | null;
   question_asked: string | null;
   student_answer: string;
-  action_taken: string;
+  action_taken: ActionType;
 }
 
 async function logEvaluation(

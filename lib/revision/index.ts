@@ -41,6 +41,11 @@ export {
   buildConstrainedSystemPrompt,
 } from "./instruction-builder";
 
+export {
+  runCombinedAgent,
+  responseHasQuestion,
+} from "./combined-agent";
+
 export type {
   ActionType,
   AgentPhase,
