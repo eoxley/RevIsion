@@ -168,6 +168,9 @@ export default function Home() {
               <Link href="/accessibility" className="hover:text-white transition">
                 Accessibility
               </Link>
+              <a href="mailto:support@myrevisionary.com" className="hover:text-white transition">
+                Support
+              </a>
             </nav>
 
             <p className="text-sm">&copy; 2025 myrevisionary</p>

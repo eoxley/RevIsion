@@ -32,7 +32,8 @@ export default function PrivacyPolicy() {
             </p>
             <p className="text-neutral-600 mb-4">
               <strong>Contact:</strong><br />
-              Email: privacy@myrevisionary.com<br />
+              General support: <a href="mailto:support@myrevisionary.com" className="text-revision-green-600 hover:underline">support@myrevisionary.com</a><br />
+              Privacy enquiries: <a href="mailto:privacy@myrevisionary.com" className="text-revision-green-600 hover:underline">privacy@myrevisionary.com</a><br />
               Address: myrevisionary ltd, United Kingdom
             </p>
           </section>

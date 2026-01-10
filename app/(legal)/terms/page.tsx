@@ -206,7 +206,8 @@ export default function TermsOfService() {
               For questions about these Terms, contact us at:
             </p>
             <p className="text-neutral-600 mb-4">
-              Email: legal@myrevisionary.com<br />
+              General support: <a href="mailto:support@myrevisionary.com" className="text-revision-green-600 hover:underline">support@myrevisionary.com</a><br />
+              Legal enquiries: <a href="mailto:legal@myrevisionary.com" className="text-revision-green-600 hover:underline">legal@myrevisionary.com</a><br />
               myrevisionary ltd<br />
               United Kingdom
             </p>
