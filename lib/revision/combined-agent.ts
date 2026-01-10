@@ -43,6 +43,7 @@ interface CombinedAgentInput {
   correctStreak: number;
   markScheme?: string | null;
   messageHistory?: Array<{ role: "user" | "assistant"; content: string }>;
+  isDiagnosticMode?: boolean;
 }
 
 interface CombinedAgentOutput {
@@ -378,11 +379,80 @@ function determineAction(
 }
 
 /**
+ * Build the diagnostic mode system prompt
+ * Stripped down - just ask the question, no teaching
+ */
+function buildDiagnosticSystemPrompt(): string {
+  return `You are a Curriculum Diagnostic Agent inside a GCSE revision system.
+
+Your ONLY job is to ask diagnostic questions to assess where the student is in the curriculum.
+
+═══════════════════════════════════════════════════════════
+CRITICAL RULES (NON-NEGOTIABLE)
+═══════════════════════════════════════════════════════════
+
+1. Ask ONLY the diagnostic question provided
+2. Do NOT teach, explain, or give hints
+3. Do NOT use revision language like "let's learn" or "I'll help you understand"
+4. Use ONLY neutral acknowledgements: "Thanks", "Okay", "Got it"
+5. Keep responses under 30 words total
+6. End with the diagnostic question
+
+═══════════════════════════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════════════════════════
+
+<EVALUATION>
+{"evaluation": "unknown", "confidence": "low", "error_type": null}
+</EVALUATION>
+<TUTOR>
+[Brief neutral acknowledgement if not first question] [The diagnostic question]
+</TUTOR>
+
+You are NOT revising. You are NOT teaching. You are ONLY diagnosing.`;
+}
+
+/**
+ * Build diagnostic mode user prompt
+ */
+function buildDiagnosticUserPrompt(
+  question: string | null,
+  studentAnswer: string,
+  isFirstQuestion: boolean
+): string {
+  let prompt = "";
+
+  if (isFirstQuestion) {
+    prompt = `This is the START of the diagnostic session.
+
+DIAGNOSTIC QUESTION TO ASK:
+${question || "What topics in this subject do you feel most confident about?"}
+
+Say: "Let me see where you are with this subject. Quick question:" then ask the question.`;
+  } else {
+    prompt = `STUDENT'S RESPONSE TO PREVIOUS DIAGNOSTIC:
+${studentAnswer}
+
+NEXT DIAGNOSTIC QUESTION TO ASK:
+${question || "What would you like to focus on?"}
+
+Say "Thanks." or "Okay." or "Got it." then ask the next question.`;
+  }
+
+  return prompt;
+}
+
+/**
  * Run the combined agent
  */
 export async function runCombinedAgent(
   input: CombinedAgentInput
 ): Promise<CombinedAgentOutput> {
+  // Check if in diagnostic mode
+  if (input.isDiagnosticMode) {
+    return runDiagnosticAgent(input);
+  }
+
   // Get allowed techniques based on learning style
   const allowedTechniques = getAllowedTechniques(input.learningStyle);
 
@@ -460,4 +530,61 @@ export async function runCombinedAgent(
  */
 export function responseHasQuestion(message: string): boolean {
   return message.includes("?");
+}
+
+/**
+ * Run the diagnostic agent (separate from revision agent)
+ */
+async function runDiagnosticAgent(
+  input: CombinedAgentInput
+): Promise<CombinedAgentOutput> {
+  const systemPrompt = buildDiagnosticSystemPrompt();
+  const isFirstQuestion = !input.messageHistory || input.messageHistory.length === 0;
+  const userPrompt = buildDiagnosticUserPrompt(
+    input.question,
+    input.studentAnswer,
+    isFirstQuestion
+  );
+
+  // Build messages - simpler for diagnostic
+  const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt },
+  ];
+
+  // Call LLM
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages,
+    temperature: 0.5, // Lower temperature for consistent diagnostic
+    max_tokens: 150, // Short responses only
+  });
+
+  const content = response.choices[0]?.message?.content || "";
+
+  // Parse tutor message
+  let tutorMessage = parseTutorMessage(content);
+  if (!tutorMessage) {
+    // Fallback - just ask the question
+    tutorMessage = isFirstQuestion
+      ? `Let me see where you are with this subject. Quick question: ${input.question}`
+      : `Thanks. ${input.question}`;
+  }
+
+  // Ensure the diagnostic question is in the response
+  if (input.question && !tutorMessage.includes("?")) {
+    tutorMessage = tutorMessage.trimEnd() + " " + input.question;
+  }
+
+  return {
+    evaluation: {
+      evaluation: "unknown",
+      confidence: "low",
+      error_type: null,
+    },
+    tutorMessage,
+    determinedAction: "DIAGNOSTIC_QUESTION",
+    allowedTechniques: [],
+    usedTechniques: [],
+  };
 }

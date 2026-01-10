@@ -91,6 +91,23 @@ export async function POST(req: NextRequest) {
     }
 
     // ═══════════════════════════════════════════════════════════
+    // CURRICULUM DIAGNOSTIC GATE
+    // Subject selection ≠ ready to revise
+    // ═══════════════════════════════════════════════════════════
+
+    let isDiagnosticMode = requiresDiagnostic(sessionState);
+
+    // If in diagnostic mode, inject the next diagnostic question
+    if (isDiagnosticMode && !isDiagnosticComplete(sessionState)) {
+      // Get the next diagnostic question based on subject
+      const diagnosticQuestion = getNextDiagnosticQuestion(
+        subject_code || "DEFAULT",
+        sessionState.diagnostic_questions_asked
+      );
+      sessionState.current_question = diagnosticQuestion;
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // RUN COMBINED AGENT (SINGLE LLM CALL)
     // ═══════════════════════════════════════════════════════════
 
@@ -104,6 +121,7 @@ export async function POST(req: NextRequest) {
       correctStreak: sessionState.correct_streak,
       markScheme: mark_scheme,
       messageHistory: message_history.slice(-4),
+      isDiagnosticMode: isDiagnosticMode && !isDiagnosticComplete(sessionState),
     });
 
     // ═══════════════════════════════════════════════════════════
@@ -112,8 +130,22 @@ export async function POST(req: NextRequest) {
 
     let updatedState = { ...sessionState };
 
-    // Update state from evaluation (if it's a real evaluation)
-    if (result.evaluation.evaluation !== "unknown") {
+    // Handle diagnostic mode state updates
+    if (isDiagnosticMode && result.determinedAction === "DIAGNOSTIC_QUESTION") {
+      // Increment diagnostic count after each diagnostic question
+      updatedState = incrementDiagnosticCount(updatedState);
+
+      // Check if diagnostic is now complete
+      if (isDiagnosticComplete(updatedState)) {
+        // Confirm curriculum position - allow revision to begin
+        updatedState = confirmCurriculumPosition(updatedState);
+        isDiagnosticMode = false; // No longer in diagnostic mode
+      }
+    }
+
+    // Update state from evaluation (if it's a real evaluation and NOT in diagnostic mode)
+    // During diagnostic, we're just asking questions - not evaluating for learning progress
+    if (result.evaluation.evaluation !== "unknown" && !isDiagnosticMode) {
       updatedState = updateStateFromEvaluation(
         updatedState,
         result.evaluation.evaluation
@@ -128,10 +160,12 @@ export async function POST(req: NextRequest) {
       phase
     );
 
-    // Extract question from tutor response
-    const extractedQuestion = extractQuestionFromMessage(result.tutorMessage);
-    if (extractedQuestion) {
-      updatedState.current_question = extractedQuestion;
+    // Extract question from tutor response (not in diagnostic mode)
+    if (!isDiagnosticMode) {
+      const extractedQuestion = extractQuestionFromMessage(result.tutorMessage);
+      if (extractedQuestion) {
+        updatedState.current_question = extractedQuestion;
+      }
     }
 
     // Persist updated state
