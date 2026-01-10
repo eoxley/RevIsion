@@ -20,6 +20,11 @@ import {
   updateStateFromEvaluation,
   updateStateWithAction,
   getPhaseForAction,
+  incrementDiagnosticCount,
+  confirmCurriculumPosition,
+  requiresDiagnostic,
+  isDiagnosticComplete,
+  getNextDiagnosticQuestion,
   type RevisionSessionState,
   type LearningStyle,
   type ActionType,
@@ -255,6 +260,9 @@ async function loadSessionState(
     phase: data.phase,
     current_question: data.current_question,
     expected_answer_hint: data.expected_answer_hint,
+    // Curriculum diagnostic fields
+    curriculum_position_confirmed: data.curriculum_position_confirmed ?? false,
+    diagnostic_questions_asked: data.diagnostic_questions_asked ?? 0,
   };
 }
 
@@ -275,6 +283,9 @@ async function saveSessionState(
       phase: state.phase,
       current_question: state.current_question,
       expected_answer_hint: state.expected_answer_hint,
+      // Curriculum diagnostic fields
+      curriculum_position_confirmed: state.curriculum_position_confirmed,
+      diagnostic_questions_asked: state.diagnostic_questions_asked,
     },
     { onConflict: "session_id" }
   );

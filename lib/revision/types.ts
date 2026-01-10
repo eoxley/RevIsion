@@ -10,6 +10,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export type ActionType =
+  | "DIAGNOSTIC_QUESTION"
   | "RETRY_WITH_HINT"
   | "REPHRASE_SIMPLER"
   | "EXTEND_DIFFICULTY"
@@ -26,6 +27,7 @@ export type ActionType =
 export type AgentPhase =
   | "greeting"
   | "topic_selection"
+  | "curriculum_diagnostic"
   | "knowledge_ingestion"
   | "active_revision"
   | "recall_check"
@@ -72,6 +74,10 @@ export interface RevisionSessionState {
 
   current_question: string | null;
   expected_answer_hint: string | null;
+
+  // Curriculum diagnostic state
+  curriculum_position_confirmed: boolean;
+  diagnostic_questions_asked: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

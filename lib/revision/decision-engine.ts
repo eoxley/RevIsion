@@ -23,12 +23,45 @@ interface DecisionResult {
  * Determine the next action based on current state and evaluation
  *
  * This is pure logic - no side effects, fully testable.
+ *
+ * CRITICAL INVARIANT:
+ * No session may enter knowledge_ingestion, active_revision, recall_check,
+ * or misconception_repair until curriculum_position_confirmed === true.
  */
 export function determineNextAction(
   state: RevisionSessionState,
   evaluation: Evaluation | null
 ): DecisionResult {
-  // Handle greeting phase - need to select topic first
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CURRICULUM DIAGNOSTIC GATE (MANDATORY)
+  // Subject selection ≠ ready to revise
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // If curriculum position is NOT confirmed, we MUST run diagnostic first
+  if (!state.curriculum_position_confirmed) {
+    // Check if diagnostic is complete (3+ questions asked)
+    if (state.diagnostic_questions_asked >= 3) {
+      // Diagnostic complete - allow progression to teaching
+      // The caller will set curriculum_position_confirmed = true
+      return {
+        action: "INITIAL_QUESTION",
+        phase: "knowledge_ingestion",
+      };
+    }
+
+    // Diagnostic NOT complete - ask another diagnostic question
+    // This blocks ALL teaching phases
+    return {
+      action: "DIAGNOSTIC_QUESTION",
+      phase: "curriculum_diagnostic",
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NORMAL REVISION FLOW (only after diagnostic confirmed)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Handle greeting/topic_selection for confirmed sessions (resume scenario)
   if (state.phase === "greeting" || state.phase === "topic_selection") {
     return {
       action: "INITIAL_QUESTION",
@@ -204,6 +237,9 @@ export function getPhaseForAction(
   currentPhase: AgentPhase
 ): AgentPhase {
   switch (action) {
+    case "DIAGNOSTIC_QUESTION":
+      return "curriculum_diagnostic";
+
     case "INITIAL_QUESTION":
       return "knowledge_ingestion";
 
@@ -239,8 +275,9 @@ export function isActionAllowedInPhase(
   phase: AgentPhase
 ): boolean {
   const allowedActions: Record<AgentPhase, ActionType[]> = {
-    greeting: ["INITIAL_QUESTION"],
-    topic_selection: ["INITIAL_QUESTION"],
+    greeting: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION"],
+    topic_selection: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION"],
+    curriculum_diagnostic: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION", "AWAIT_RESPONSE"],
     knowledge_ingestion: ["INITIAL_QUESTION", "AWAIT_RESPONSE"],
     active_revision: [
       "EXTEND_DIFFICULTY",

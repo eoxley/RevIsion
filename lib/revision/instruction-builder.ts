@@ -26,8 +26,29 @@ interface InstructionParams {
 
 /**
  * Build the complete system prompt for the tutor sub-agent
+ * When in diagnostic mode, uses stripped-down instructions
  */
-export function buildConstrainedSystemPrompt(instructions: string): string {
+export function buildConstrainedSystemPrompt(
+  instructions: string,
+  isDiagnosticMode: boolean = false
+): string {
+  // Diagnostic mode uses minimal instructions - just ask the question
+  if (isDiagnosticMode) {
+    return `You are a Curriculum Diagnostic Agent.
+
+Your ONLY job is to ask diagnostic questions to assess where the student is in the curriculum.
+
+RULES:
+1. Ask ONLY the question provided
+2. Do NOT teach, explain, or give hints
+3. Do NOT use revision language like "let's learn" or "I'll help you understand"
+4. Use neutral acknowledgements only: "Thanks", "Okay", "Got it"
+5. Keep responses under 30 words
+6. End with the diagnostic question
+
+${instructions}`;
+  }
+
   return `You are a Revision Tutor Sub-Agent inside an AI-powered GCSE revision system.
 
 You do NOT decide what to do next.
@@ -174,6 +195,21 @@ function getActionInstructions(
   evaluation: Evaluation | null
 ): string {
   switch (action) {
+    case "DIAGNOSTIC_QUESTION":
+      return `INSTRUCTIONS:
+- You are in CURRICULUM DIAGNOSTIC mode
+- Your ONLY job is to ask the diagnostic question provided
+- Do NOT teach, hint, explain, or revise
+- Do NOT say "let me help you learn" or similar
+- If this is the first diagnostic, say "Let me see where you are with this subject. Quick question:"
+- If this is a follow-up diagnostic, just say "Thanks. Next one:" or "Okay. And this one:"
+- Ask the EXACT question provided, ending with a question mark
+- Keep your response under 30 words total
+- NO teaching. NO hints. Just the question.
+
+DIAGNOSTIC QUESTION TO ASK:
+${state.current_question || "What topics in this subject do you feel most confident about?"}`;
+
     case "INITIAL_QUESTION":
       return `INSTRUCTIONS:
 - Ask an initial question about ${state.topic_name || "this topic"}

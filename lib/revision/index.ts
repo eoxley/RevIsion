@@ -27,7 +27,17 @@ export {
   hasDemonstratedMastery,
   isStruggling,
   isFirstAttempt,
+  incrementDiagnosticCount,
+  confirmCurriculumPosition,
+  requiresDiagnostic,
+  isDiagnosticComplete,
 } from "./state";
+
+export {
+  getDiagnosticQuestions,
+  getNextDiagnosticQuestion,
+  hasDiagnosticQuestions,
+} from "./diagnostic-questions";
 
 export {
   determineNextAction,

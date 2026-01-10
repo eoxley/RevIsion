@@ -33,6 +33,10 @@ export function createInitialState(
 
     current_question: null,
     expected_answer_hint: null,
+
+    // Curriculum diagnostic - MUST complete before revision
+    curriculum_position_confirmed: false,
+    diagnostic_questions_asked: 0,
   };
 }
 
@@ -149,4 +153,44 @@ export function isStruggling(state: RevisionSessionState): boolean {
  */
 export function isFirstAttempt(state: RevisionSessionState): boolean {
   return state.attempts === 0;
+}
+
+/**
+ * Increment diagnostic question count
+ */
+export function incrementDiagnosticCount(
+  state: RevisionSessionState
+): RevisionSessionState {
+  return {
+    ...state,
+    diagnostic_questions_asked: state.diagnostic_questions_asked + 1,
+  };
+}
+
+/**
+ * Mark curriculum position as confirmed (diagnostic complete)
+ */
+export function confirmCurriculumPosition(
+  state: RevisionSessionState
+): RevisionSessionState {
+  return {
+    ...state,
+    curriculum_position_confirmed: true,
+    phase: "knowledge_ingestion",
+  };
+}
+
+/**
+ * Check if diagnostic is required
+ */
+export function requiresDiagnostic(state: RevisionSessionState): boolean {
+  return !state.curriculum_position_confirmed;
+}
+
+/**
+ * Check if diagnostic is complete (asked enough questions)
+ */
+export function isDiagnosticComplete(state: RevisionSessionState): boolean {
+  // Complete after 3 diagnostic questions minimum
+  return state.diagnostic_questions_asked >= 3;
 }
