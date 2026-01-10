@@ -8,29 +8,29 @@ import { NextResponse } from "next/server";
  * GET /api/subjects - Get student's current subjects
  */
 
-// Map subject codes to database subject IDs
+// Map UI subject codes to database codes (UPPERCASE in DB)
 const SUBJECT_CODE_MAP: Record<string, string> = {
-  maths: "maths",
-  english_lang: "english_language",
-  english_lit: "english_literature",
-  biology: "biology",
-  chemistry: "chemistry",
-  physics: "physics",
-  combined_science: "combined_science",
-  history: "history",
-  geography: "geography",
-  religious_studies: "religious_studies",
-  french: "french",
-  spanish: "spanish",
-  german: "german",
-  art: "art_design",
-  music: "music",
-  drama: "drama",
-  dt: "design_technology",
-  computer_science: "computer_science",
-  pe: "physical_education",
-  food_tech: "food_technology",
-  business: "business_studies",
+  maths: "MATHS",
+  english_lang: "ENG_LANG",
+  english_lit: "ENG_LIT",
+  biology: "BIOLOGY",
+  chemistry: "CHEMISTRY",
+  physics: "PHYSICS",
+  combined_science: "COMBINED_SCI",
+  history: "HISTORY",
+  geography: "GEOGRAPHY",
+  religious_studies: "RE",
+  french: "FRENCH",
+  spanish: "SPANISH",
+  german: "GERMAN",
+  art: "ART",
+  music: "MUSIC",
+  drama: "DRAMA",
+  dt: "DT",
+  computer_science: "CS",
+  pe: "PE",
+  food_tech: "FOOD_TECH",
+  business: "BUSINESS",
 };
 
 export async function POST(request: Request) {
