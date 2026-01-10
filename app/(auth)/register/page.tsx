@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/logo";
 
 /**
- * Register Page
+ * Register Page - Parent/Guardian Account Creation
  *
  * Brand-compliant registration with:
  * - Centered logo
@@ -17,10 +17,13 @@ import { Logo } from "@/components/brand/logo";
  * - Real Supabase authentication
  *
  * Auth Flow:
- * 1. User enters name, email, password
- * 2. Supabase auth.signUp creates auth user with metadata
- * 3. Database trigger auto-creates profile with first_name, last_name
- * 4. On success: redirect to /dashboard
+ * 1. Parent enters their name, email, password
+ * 2. Supabase auth.signUp creates auth user with parent's metadata
+ * 3. On success: redirect to /onboarding where they set up their child's profile
+ *
+ * Account Structure:
+ * - Parent's credentials are the account login
+ * - Child's profile is created during onboarding
  */
 export default function RegisterPage() {
   const router = useRouter();
@@ -74,7 +77,7 @@ export default function RegisterPage() {
           <div className="flex flex-col items-center space-y-2">
             <Logo size="xl" />
             <p className="text-sm text-neutral-500">
-              Your personal GCSE revision coach
+              Smart GCSE revision for your child
             </p>
           </div>
 
@@ -83,10 +86,10 @@ export default function RegisterPage() {
             <div className="space-y-6">
               <div className="text-center">
                 <h1 className="text-xl font-semibold text-neutral-900">
-                  Create an account
+                  Create a parent account
                 </h1>
                 <p className="mt-1 text-sm text-neutral-500">
-                  Start discovering your learning style
+                  Set up your child&apos;s personalised revision in minutes
                 </p>
               </div>
 
@@ -98,11 +101,18 @@ export default function RegisterPage() {
                   </div>
                 )}
 
+                {/* Parent/Guardian details section */}
+                <div className="space-y-1">
+                  <p className="text-xs text-neutral-500 font-medium uppercase tracking-wide">
+                    Your details (parent/guardian)
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     id="firstName"
-                    label="First name"
-                    placeholder="John"
+                    label="Your first name"
+                    placeholder="Sarah"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
@@ -110,8 +120,8 @@ export default function RegisterPage() {
                   />
                   <Input
                     id="lastName"
-                    label="Last name"
-                    placeholder="Doe"
+                    label="Your last name"
+                    placeholder="Smith"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
@@ -121,9 +131,9 @@ export default function RegisterPage() {
 
                 <Input
                   id="email"
-                  label="Email"
+                  label="Your email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="parent@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -165,7 +175,7 @@ export default function RegisterPage() {
 
           {/* Footer text */}
           <p className="text-center text-xs text-neutral-400">
-            Built for UK GCSE students preparing for 2026 exams
+            You&apos;ll add your child&apos;s details in the next step
           </p>
         </div>
       </main>

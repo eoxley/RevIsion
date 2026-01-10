@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/brand/logo";
 
 /**
- * Login Page - Phase 1
+ * Login Page - Parent/Guardian Access
  *
  * Brand-compliant login with:
  * - Centered logo
@@ -18,14 +18,14 @@ import { Logo } from "@/components/brand/logo";
  * - Secure redirect on success
  *
  * Auth Flow:
- * 1. User enters email + password
+ * 1. Parent enters their email + password
  * 2. Supabase auth.signInWithPassword validates credentials
- * 3. On success: redirect to /dashboard
+ * 3. On success: redirect to /dashboard to view child's progress
  * 4. On error: display error in neutral tones (no red)
  *
- * User → StudentProfile Mapping:
- * - auth.users.id maps to profiles.id (1:1 via trigger)
- * - profile created automatically on signup via database trigger
+ * Account Structure:
+ * - Parent's email is the account login
+ * - Child's profile is linked to parent's auth account
  */
 export default function LoginPage() {
   const router = useRouter();
@@ -66,7 +66,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center space-y-2">
             <Logo size="xl" />
             <p className="text-sm text-neutral-500">
-              Your personal GCSE revision coach
+              Smart GCSE revision for your child
             </p>
           </div>
 
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   Welcome back
                 </h1>
                 <p className="mt-1 text-sm text-neutral-500">
-                  Sign in to continue your learning journey
+                  Sign in to manage your child&apos;s revision
                 </p>
               </div>
 
@@ -92,9 +92,9 @@ export default function LoginPage() {
 
                 <Input
                   id="email"
-                  label="Email"
+                  label="Your email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="parent@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -136,7 +136,7 @@ export default function LoginPage() {
 
           {/* Footer text */}
           <p className="text-center text-xs text-neutral-400">
-            Built for UK GCSE students preparing for 2026 exams
+            Helping parents support their child&apos;s GCSE success
           </p>
         </div>
       </main>

@@ -45,16 +45,28 @@ interface LearningProfile {
   isMultimodal: boolean;
 }
 
+interface SubjectContext {
+  subjectCode: string;
+  subjectName: string;
+  resumeMessage: string;
+  nextTopic: string | null;
+  hasHistory: boolean;
+}
+
 interface PersistentChatProps {
   learningProfile: LearningProfile | null;
   studentName?: string;
   subjects?: string[];
+  subjectContext?: SubjectContext | null;
+  onClearSubjectContext?: () => void;
 }
 
 export function PersistentChat({
   learningProfile,
   studentName,
   subjects = [],
+  subjectContext,
+  onClearSubjectContext,
 }: PersistentChatProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -97,6 +109,26 @@ export function PersistentChat({
   useEffect(() => {
     async function initializeChat() {
       try {
+        // If we have subject context, start a fresh subject-focused session
+        if (subjectContext) {
+          const newSessionRes = await fetch("/api/sessions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_type: "subject_focused",
+              subject_code: subjectContext.subjectCode,
+            }),
+          });
+          const newSessionData = await newSessionRes.json();
+
+          if (newSessionData.session) {
+            setSession(newSessionData.session);
+            addSubjectGreeting(newSessionData.session.id, subjectContext);
+          }
+          return;
+        }
+
+        // Normal initialization - check for existing session
         const sessionsRes = await fetch("/api/sessions");
         const sessionsData = await sessionsRes.json();
 
@@ -133,7 +165,7 @@ export function PersistentChat({
     }
 
     initializeChat();
-  }, []);
+  }, [subjectContext]);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -187,6 +219,29 @@ What do you need help with?`;
       });
     } catch (error) {
       console.error("Failed to save greeting:", error);
+    }
+  }
+
+  // Add subject-focused greeting using resume context
+  async function addSubjectGreeting(sessionId: string, context: SubjectContext) {
+    const greeting = context.resumeMessage;
+
+    const greetingMessage: Message = { role: "assistant", content: greeting };
+    setMessages([greetingMessage]);
+
+    try {
+      await fetch(`/api/sessions/${sessionId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "assistant",
+          content: greeting,
+          interaction_type: "greeting",
+          subject_code: context.subjectCode,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to save subject greeting:", error);
     }
   }
 
@@ -297,6 +352,13 @@ What do you need help with?`;
               }
             : null,
           selectedSubjects: subjects,
+          currentSubject: subjectContext
+            ? {
+                code: subjectContext.subjectCode,
+                name: subjectContext.subjectName,
+                nextTopic: subjectContext.nextTopic,
+              }
+            : null,
         }),
       });
 
@@ -548,6 +610,13 @@ What do you need help with?`;
               }
             : null,
           selectedSubjects: subjects,
+          currentSubject: subjectContext
+            ? {
+                code: subjectContext.subjectCode,
+                name: subjectContext.subjectName,
+                nextTopic: subjectContext.nextTopic,
+              }
+            : null,
         }),
       });
 
@@ -680,15 +749,29 @@ What do you need help with?`;
       <div className="p-4 border-b border-neutral-200 bg-white rounded-t-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* Back button when in subject context */}
+            {subjectContext && onClearSubjectContext && (
+              <button
+                onClick={onClearSubjectContext}
+                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition"
+                title="Back to all subjects"
+              >
+                <BackIcon className="w-4 h-4 text-neutral-600" />
+              </button>
+            )}
             <div className="w-10 h-10 rounded-full bg-revision-green-100 flex items-center justify-center">
               <BrainIcon className="w-6 h-6 text-revision-green-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-neutral-900">revIsion Coach</h3>
+              <h3 className="font-semibold text-neutral-900">
+                {subjectContext ? subjectContext.subjectName : "revIsion Coach"}
+              </h3>
               <p className="text-sm text-revision-green-600">
-                {learningProfile
-                  ? `Tailored to how you learn`
-                  : "Your AI Study Buddy"}
+                {subjectContext
+                  ? "Let's continue where you left off"
+                  : learningProfile
+                    ? `Tailored to how you learn`
+                    : "Your AI Study Buddy"}
               </p>
             </div>
           </div>
@@ -1027,6 +1110,23 @@ function LoadingIcon({ className }: { className?: string }) {
       strokeWidth="2"
     >
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
+
+function BackIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 12H5" />
+      <path d="M12 19l-7-7 7-7" />
     </svg>
   );
 }

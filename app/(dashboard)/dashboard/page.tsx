@@ -1,10 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { PersistentChat } from "@/components/chat/persistent-chat";
-import {
-  ProgressSidebar,
-  ProgressSidebarCompact,
-} from "@/components/dashboard/progress-sidebar";
+import { DashboardClient } from "./dashboard-client";
 import Link from "next/link";
 
 /**
@@ -108,70 +104,12 @@ export default async function DashboardPage() {
   const studentName = profile?.first_name || undefined;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
-      {/* Main Content - Chat Interface (Primary) */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <div className="mb-4">
-          <h1 className="text-2xl font-semibold text-neutral-900">
-            {studentName ? `Hey ${studentName}` : "Hey there"}
-          </h1>
-          <p className="text-neutral-500 mt-1">
-            {learningProfile
-              ? `Your ${learningProfile.primaryStyles[0]?.replace("_", "/")} learning style coach is here to help`
-              : "Ready to smash your revision?"}
-          </p>
-        </div>
-
-        {/* Learning style prompt if not completed */}
-        {!learningProfile && (
-          <div className="mb-4 p-4 bg-revision-blue-50 border border-revision-blue-100 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-revision-blue-800">
-                  Let's find out how you learn best
-                </p>
-                <p className="text-xs text-revision-blue-600 mt-0.5">
-                  Quick quiz to unlock personalised revision tips
-                </p>
-              </div>
-              <Link
-                href="/assessment"
-                className="px-4 py-2 bg-revision-blue-600 text-white text-sm font-medium rounded-lg hover:bg-revision-blue-700 transition"
-              >
-                Take the quiz
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Chat Interface - Primary Surface */}
-        <div className="flex-1">
-          <PersistentChat
-            learningProfile={learningProfile}
-            studentName={studentName}
-            subjects={subjectNames}
-          />
-        </div>
-      </main>
-
-      {/* Progress Sidebar - Desktop only */}
-      <div className="hidden lg:block">
-        <ProgressSidebar
-          studentSubjects={studentSubjects || []}
-          learningProfile={learningProfile}
-          sessionCount={sessionCount || 0}
-          studentName={studentName}
-        />
-      </div>
-
-      {/* Compact Progress - Mobile only */}
-      <div className="lg:hidden">
-        <ProgressSidebarCompact
-          learningProfile={learningProfile}
-          sessionCount={sessionCount || 0}
-        />
-      </div>
-    </div>
+    <DashboardClient
+      studentName={studentName}
+      learningProfile={learningProfile}
+      studentSubjects={studentSubjects || []}
+      subjectNames={subjectNames}
+      sessionCount={sessionCount || 0}
+    />
   );
 }

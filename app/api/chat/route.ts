@@ -17,11 +17,11 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, learningProfile, varkProfile, selectedSubjects } = await req.json();
+    const { messages, learningProfile, varkProfile, selectedSubjects, currentSubject } = await req.json();
     // Support both learningProfile and varkProfile for backwards compatibility
     const profile = learningProfile || varkProfile;
 
-    const systemPrompt = createSystemPrompt(profile, selectedSubjects);
+    const systemPrompt = createSystemPrompt(profile, selectedSubjects, currentSubject);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -230,7 +230,13 @@ WHEN CREATING A REVISION PLAN:
 10. Build in buffer time for catching up`;
 }
 
-function createSystemPrompt(learningProfile: LearningProfile | null, selectedSubjects?: string[]) {
+interface CurrentSubject {
+  code: string;
+  name: string;
+  nextTopic?: string | null;
+}
+
+function createSystemPrompt(learningProfile: LearningProfile | null, selectedSubjects?: string[], currentSubject?: CurrentSubject | null) {
   // Get live curriculum data
   const curriculumSummary = getCurriculumSummary();
 
@@ -886,8 +892,37 @@ NEVER:
 
 ALWAYS ASK for their exam board if giving subject-specific advice to ensure accuracy.`;
 
+  // Add subject-focused context if resuming a specific subject
+  let subjectFocusContext = "";
+  if (currentSubject) {
+    subjectFocusContext = `
+
+═══════════════════════════════════════════════════════════
+CURRENT SUBJECT FOCUS: ${currentSubject.name.toUpperCase()}
+═══════════════════════════════════════════════════════════
+The student has specifically opened their ${currentSubject.name} revision session.
+${currentSubject.nextTopic ? `They were last working on: ${currentSubject.nextTopic}` : ""}
+
+YOUR TASK:
+- Focus ALL responses on ${currentSubject.name}
+- If they ask about other subjects, acknowledge but gently redirect to ${currentSubject.name}
+- Use the Curriculum Position Mapping strategy for ${currentSubject.name}
+- Reference ${currentSubject.name}-specific knowledge from your knowledge banks
+- Tailor all exam technique advice to ${currentSubject.name}
+${currentSubject.nextTopic ? `- Offer to continue from ${currentSubject.nextTopic} or let them choose a different topic` : ""}
+
+SUBJECT-SPECIFIC GUIDANCE:
+${currentSubject.code.includes("math") ? "Focus on formulas, worked examples, and step-by-step methods. Use the maths knowledge bank." : ""}
+${currentSubject.code.includes("science") || currentSubject.code.includes("biology") || currentSubject.code.includes("chemistry") || currentSubject.code.includes("physics") ? "Focus on required practicals, key concepts, and exam questions. Use the science knowledge bank." : ""}
+${currentSubject.code.includes("english") ? "Focus on quotes, themes, and essay technique. Use the English Literature knowledge bank." : ""}
+${currentSubject.code.includes("history") ? "Focus on key dates, source analysis, and essay structure. Use the history knowledge bank." : ""}
+${currentSubject.code.includes("geography") ? "Focus on case studies, map skills, and fieldwork. Use the geography knowledge bank." : ""}
+
+Remember: This is a FOCUSED revision session for ${currentSubject.name}. Stay on topic!`;
+  }
+
   if (!learningProfile) {
-    return `${basePrompt}
+    return `${basePrompt}${subjectFocusContext}
 
 ═══════════════════════════════════════════════════════════
 LEARNING STYLE NOT SET YET
@@ -1068,7 +1103,7 @@ ${primaryStyles.includes("read_write") ? "- Read questions twice, underline comm
 ${primaryStyles.includes("kinesthetic") ? "- Physically cross off completed questions\n- Practice timing with stopwatch\n- Move positions during long exams" : ""}`;
 
   // FINAL SYSTEM PROMPT
-  return `${basePrompt}
+  return `${basePrompt}${subjectFocusContext}
 
 ═══════════════════════════════════════════════════════════
 THIS STUDENT'S LEARNING PROFILE

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 /**
  * Subject Selection Component
  *
- * Allows students to select their GCSE subjects during onboarding.
+ * Allows parents to select their child's GCSE subjects during onboarding.
  * Updates the student_subjects table in Supabase.
  */
 
@@ -50,12 +50,14 @@ interface SubjectSelectionProps {
   onComplete: (subjects: string[]) => void;
   initialSubjects?: string[];
   isLoading?: boolean;
+  childName?: string;
 }
 
 export function SubjectSelection({
   onComplete,
   initialSubjects = [],
   isLoading = false,
+  childName,
 }: SubjectSelectionProps) {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(initialSubjects);
 
@@ -77,10 +79,10 @@ export function SubjectSelection({
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-semibold text-neutral-900 mb-2">
-          What subjects are you taking?
+          What subjects is {childName || "your child"} taking?
         </h2>
         <p className="text-neutral-500">
-          Select all your GCSE subjects so I can give you the right revision help
+          Select all their GCSE subjects so we can provide the right revision support
         </p>
       </div>
 

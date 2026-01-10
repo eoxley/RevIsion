@@ -30,10 +30,10 @@ interface Subject {
 interface StudentSubject {
   id: string;
   subject_id: string;
-  exam_board: string | null;
-  target_grade: number | null;
-  priority_level: string;
-  last_studied_at: string | null;
+  exam_board?: string | null;
+  target_grade?: number | null;
+  priority_level?: string;
+  last_studied_at?: string | null;
   subjects: Subject;
 }
 
@@ -205,18 +205,20 @@ function SubjectCard({ studentSubject }: { studentSubject: StudentSubject }) {
             <p className="text-xs text-neutral-500">{exam_board}</p>
           )}
         </div>
-        <span
-          className={cn(
-            "text-xs px-2 py-0.5 rounded-full",
-            priorityStyles[priority_level] || priorityStyles.medium
-          )}
-        >
-          {priority_level === "maintenance"
-            ? "Strong"
-            : priority_level === "critical"
-              ? "Focus"
-              : null}
-        </span>
+        {priority_level && (
+          <span
+            className={cn(
+              "text-xs px-2 py-0.5 rounded-full",
+              priorityStyles[priority_level] || priorityStyles.medium
+            )}
+          >
+            {priority_level === "maintenance"
+              ? "Strong"
+              : priority_level === "critical"
+                ? "Focus"
+                : null}
+          </span>
+        )}
       </div>
       {last_studied_at && (
         <p className="text-xs text-neutral-400 mt-2">
