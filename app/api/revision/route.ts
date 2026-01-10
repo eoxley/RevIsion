@@ -262,7 +262,7 @@ interface EvaluationLogEntry {
   evaluation: {
     evaluation: string;
     confidence: string;
-    error_type: string;
+    error_type: string | null;
   };
   topic_id: string | null;
   topic_name: string | null;

@@ -1,55 +1,105 @@
 /**
- * Answer Evaluator
+ * Answer Evaluation Agent
  *
- * Evaluates student responses BEFORE response generation.
- * Returns structured JSON only.
+ * Sole responsibility: Evaluate student responses and return structured JSON.
+ *
+ * NOT a tutor. NOT an encourager. NOT a teacher.
+ * ONLY an evaluator.
  *
  * Rule: No evaluation = no response generation.
  */
 
 import { OpenAI } from "openai";
-import type { Evaluation, EvaluationResult } from "./types";
+import type { Evaluation, EvaluationResult, ErrorType } from "./types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const EVALUATION_PROMPT = `You are an answer evaluator for GCSE revision.
+const EVALUATION_PROMPT = `You are an Answer Evaluation Agent inside an AI-powered GCSE revision system.
 
-Your ONLY job is to evaluate whether the student's answer is correct, partial, or incorrect.
+Your sole responsibility is to evaluate a student's response to a revision question and return a strictly structured JSON assessment.
 
-You must respond with ONLY valid JSON in this exact format:
+You are NOT a tutor.
+You do NOT explain concepts.
+You do NOT encourage or motivate.
+You do NOT teach.
+
+You ONLY evaluate.
+
+## Your Task
+
+1. Determine whether the student's answer is:
+   - correct
+   - partial
+   - incorrect
+
+2. Assess the student's confidence level based on wording:
+   - high
+   - medium
+   - low
+
+3. If the answer is not fully correct, identify the primary error type:
+   - recall_gap (missing facts or definitions)
+   - concept_gap (misunderstanding the idea)
+   - confusion (mixing concepts)
+   - exam_technique (poor structure, vague wording)
+   - guessing (clearly uncertain or speculative)
+
+If the answer is fully correct, set error_type to null.
+
+## Output Rules (ABSOLUTE)
+
+You must return ONLY valid JSON.
+No prose.
+No markdown.
+No commentary.
+No emojis.
+
+The response MUST match this schema exactly:
+
 {
-  "evaluation": "correct" | "partial" | "incorrect",
-  "confidence": "high" | "medium" | "low",
-  "error_type": "concept_gap" | "calculation_error" | "terminology_confusion" | "incomplete_answer" | "off_topic" | "none"
+  "evaluation": "correct | partial | incorrect",
+  "confidence": "high | medium | low",
+  "error_type": "recall_gap | concept_gap | confusion | exam_technique | guessing | null"
 }
 
-Evaluation criteria:
-- "correct": The answer demonstrates understanding of the concept. Minor phrasing issues are OK.
-- "partial": The answer shows some understanding but is incomplete or has minor errors.
-- "incorrect": The answer is wrong or shows fundamental misunderstanding.
+## Evaluation Guidelines
 
-Error types:
-- "concept_gap": Student doesn't understand the underlying concept
-- "calculation_error": Method is right but calculation is wrong
-- "terminology_confusion": Wrong terms but right idea
-- "incomplete_answer": Correct but missing key parts
-- "off_topic": Answer doesn't address the question
-- "none": No error (for correct answers)
+- Be strict but fair
+- GCSE mark-scheme logic applies:
+  - Missing key terms → partial
+  - Incorrect definitions → incorrect
+  - Correct idea but weak explanation → partial
+- Do NOT reward confidence if the answer is wrong
+- Do NOT penalise spelling unless meaning is unclear
+- If unsure between two grades, choose the lower one
 
-DO NOT:
-- Explain your reasoning
-- Add any text outside the JSON
-- Use markdown formatting
+## Failure Handling
 
-ONLY output the JSON object.`;
+If the student response is empty, "I don't know", or a non-attempt, return:
+{
+  "evaluation": "incorrect",
+  "confidence": "low",
+  "error_type": "recall_gap"
+}
+
+## Final Rule
+
+If you cannot confidently evaluate the answer, still return the closest valid classification.
+You may NEVER refuse.
+You may NEVER return free text.
+
+Your output feeds a control system.
+Precision matters more than kindness.`;
 
 interface EvaluateParams {
   studentAnswer: string;
   currentQuestion: string | null;
   expectedAnswerHint: string | null;
   topicName: string | null;
+  markScheme?: string | null;
+  difficultyLevel?: string | null;
 }
 
 /**
@@ -57,14 +107,21 @@ interface EvaluateParams {
  * Returns structured evaluation or fails safely
  */
 export async function evaluateAnswer(params: EvaluateParams): Promise<Evaluation> {
-  const { studentAnswer, currentQuestion, expectedAnswerHint, topicName } = params;
+  const {
+    studentAnswer,
+    currentQuestion,
+    expectedAnswerHint,
+    topicName,
+    markScheme,
+    difficultyLevel,
+  } = params;
 
   // If no question was asked, we can't evaluate
   if (!currentQuestion) {
     return {
       evaluation: "unknown",
       confidence: "low",
-      error_type: "none",
+      error_type: null,
     };
   }
 
@@ -73,7 +130,16 @@ export async function evaluateAnswer(params: EvaluateParams): Promise<Evaluation
     return {
       evaluation: "unknown",
       confidence: "high",
-      error_type: "off_topic",
+      error_type: null,
+    };
+  }
+
+  // Check for explicit non-attempts
+  if (isNonAttempt(studentAnswer)) {
+    return {
+      evaluation: "incorrect",
+      confidence: "low",
+      error_type: "recall_gap",
     };
   }
 
@@ -81,7 +147,9 @@ export async function evaluateAnswer(params: EvaluateParams): Promise<Evaluation
     studentAnswer,
     currentQuestion,
     expectedAnswerHint,
-    topicName
+    topicName,
+    markScheme || null,
+    difficultyLevel || null
   );
 
   // Try evaluation with retry
@@ -98,7 +166,7 @@ export async function evaluateAnswer(params: EvaluateParams): Promise<Evaluation
     return {
       evaluation: "unknown",
       confidence: "low",
-      error_type: "none",
+      error_type: null,
     };
   }
 
@@ -123,8 +191,14 @@ async function attemptEvaluation(userPrompt: string): Promise<Evaluation | null>
     const content = response.choices[0]?.message?.content?.trim();
     if (!content) return null;
 
+    // Clean potential markdown formatting
+    const cleanContent = content
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
+
     // Parse JSON
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(cleanContent);
 
     // Validate structure
     if (!isValidEvaluation(parsed)) {
@@ -146,17 +220,28 @@ function buildEvaluationPrompt(
   studentAnswer: string,
   currentQuestion: string,
   expectedAnswerHint: string | null,
-  topicName: string | null
+  topicName: string | null,
+  markScheme: string | null,
+  difficultyLevel: string | null
 ): string {
-  let prompt = `Topic: ${topicName || "General"}\n\n`;
-  prompt += `Question asked: ${currentQuestion}\n\n`;
+  let prompt = `## Evaluation Request\n\n`;
 
-  if (expectedAnswerHint) {
-    prompt += `Expected answer should include: ${expectedAnswerHint}\n\n`;
+  prompt += `**Topic:** ${topicName || "General GCSE"}\n`;
+
+  if (difficultyLevel) {
+    prompt += `**Difficulty:** ${difficultyLevel}\n`;
   }
 
-  prompt += `Student's answer: ${studentAnswer}\n\n`;
-  prompt += `Evaluate this answer.`;
+  prompt += `\n**Question asked:**\n${currentQuestion}\n`;
+
+  if (markScheme) {
+    prompt += `\n**Mark scheme / Success criteria:**\n${markScheme}\n`;
+  } else if (expectedAnswerHint) {
+    prompt += `\n**Expected answer should include:**\n${expectedAnswerHint}\n`;
+  }
+
+  prompt += `\n**Student's response:**\n${studentAnswer}\n`;
+  prompt += `\n---\nEvaluate this response. Return ONLY the JSON object.`;
 
   return prompt;
 }
@@ -169,22 +254,33 @@ function isValidEvaluation(obj: unknown): boolean {
 
   const e = obj as Record<string, unknown>;
 
-  const validEvaluations: EvaluationResult[] = ["correct", "partial", "incorrect", "unknown"];
+  const validEvaluations: EvaluationResult[] = ["correct", "partial", "incorrect"];
   const validConfidences = ["high", "medium", "low"];
-  const validErrorTypes = [
+  const validErrorTypes: (ErrorType | "null")[] = [
+    "recall_gap",
     "concept_gap",
-    "calculation_error",
-    "terminology_confusion",
-    "incomplete_answer",
-    "off_topic",
-    "none",
+    "confusion",
+    "exam_technique",
+    "guessing",
+    "null",
   ];
 
-  return (
-    validEvaluations.includes(e.evaluation as EvaluationResult) &&
-    validConfidences.includes(e.confidence as string) &&
-    validErrorTypes.includes(e.error_type as string)
-  );
+  // Check evaluation
+  if (!validEvaluations.includes(e.evaluation as EvaluationResult)) {
+    return false;
+  }
+
+  // Check confidence
+  if (!validConfidences.includes(e.confidence as string)) {
+    return false;
+  }
+
+  // Check error_type (can be null or a valid string)
+  if (e.error_type !== null && !validErrorTypes.includes(e.error_type as ErrorType | "null")) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -194,17 +290,41 @@ function isMetaResponse(message: string): boolean {
   const lowerMessage = message.toLowerCase().trim();
 
   const metaPatterns = [
-    /^(hi|hello|hey|hiya)/,
-    /^(thanks|thank you|cheers)/,
+    /^(hi|hello|hey|hiya)\b/,
+    /^(thanks|thank you|cheers)\b/,
     /^(ok|okay|sure|yes|no|yep|nope)$/,
-    /^(i don'?t know|idk|no idea|not sure)/,
     /^(what|how|why|can you|could you|please)\s+(do|explain|help|tell)/,
-    /^(help|hint|clue)/,
-    /^(skip|next|move on)/,
-    /^(i'?m confused|i'?m stuck)/,
+    /^(help|hint|clue)\b/,
+    /^(skip|next|move on)\b/,
+    /\?$/, // Ends with question mark (asking, not answering)
   ];
 
   return metaPatterns.some((pattern) => pattern.test(lowerMessage));
+}
+
+/**
+ * Check for explicit non-attempts
+ */
+function isNonAttempt(message: string): boolean {
+  const lowerMessage = message.toLowerCase().trim();
+
+  const nonAttemptPatterns = [
+    /^i\s*(don'?t|do not)\s*know/,
+    /^idk$/,
+    /^no\s*idea/,
+    /^not\s*sure/,
+    /^i\s*(have\s*)?no\s*(idea|clue)/,
+    /^(i\s*)?(can'?t|cannot)\s*(remember|recall)/,
+    /^i\s*(forgot|forget)/,
+    /^pass$/,
+    /^\.{2,}$/, // Just dots
+    /^\?+$/, // Just question marks
+  ];
+
+  // Empty or very short
+  if (lowerMessage.length < 2) return true;
+
+  return nonAttemptPatterns.some((pattern) => pattern.test(lowerMessage));
 }
 
 /**
@@ -214,13 +334,14 @@ export function isHelpRequest(message: string): boolean {
   const lowerMessage = message.toLowerCase().trim();
 
   const helpPatterns = [
-    /^(help|hint|clue)/,
+    /^(help|hint|clue)\b/,
     /can (you|i) (get|have) (a )?hint/,
     /give me a hint/,
     /i('m| am) (stuck|confused)/,
     /i don'?t (understand|get it)/,
     /what (do you mean|does that mean)/,
     /can you explain/,
+    /explain (it|this|that)/,
   ];
 
   return helpPatterns.some((pattern) => pattern.test(lowerMessage));
@@ -233,10 +354,11 @@ export function isSkipRequest(message: string): boolean {
   const lowerMessage = message.toLowerCase().trim();
 
   const skipPatterns = [
-    /^(skip|next|move on)/,
+    /^(skip|next|move on)\b/,
     /can we (skip|move on)/,
     /let'?s (skip|move on)/,
     /i want to (skip|move on)/,
+    /different (question|topic)/,
   ];
 
   return skipPatterns.some((pattern) => pattern.test(lowerMessage));

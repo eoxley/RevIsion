@@ -74,13 +74,13 @@ export async function processRevisionTurn(
     evaluation = {
       evaluation: "unknown",
       confidence: "high",
-      error_type: "none",
+      error_type: null,
     };
   } else if (isSkipRequest(student_message)) {
     evaluation = {
       evaluation: "unknown",
       confidence: "high",
-      error_type: "none",
+      error_type: null,
     };
   } else if (currentState.current_question) {
     // Only evaluate if there's a question to evaluate against

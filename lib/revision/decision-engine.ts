@@ -47,10 +47,10 @@ export function determineNextAction(
       return handleCorrectAnswer(state);
 
     case "partial":
-      return handlePartialAnswer(state);
+      return handlePartialAnswer(state, evaluation);
 
     case "incorrect":
-      return handleIncorrectAnswer(state);
+      return handleIncorrectAnswer(state, evaluation);
 
     default:
       return {
@@ -81,19 +81,52 @@ function handleCorrectAnswer(state: RevisionSessionState): DecisionResult {
 
 /**
  * Handle partial answers
+ * Uses error_type for smarter decisions
  */
-function handlePartialAnswer(state: RevisionSessionState): DecisionResult {
-  // Partial answers get simpler rephrasing
-  return {
-    action: "REPHRASE_SIMPLER",
-    phase: "active_revision",
-  };
+function handlePartialAnswer(
+  state: RevisionSessionState,
+  evaluation: Evaluation
+): DecisionResult {
+  // Use error type to decide approach
+  switch (evaluation.error_type) {
+    case "exam_technique":
+      // Structure issue - retry with same content, focus on technique
+      return {
+        action: "RETRY_WITH_HINT",
+        phase: "active_revision",
+      };
+
+    case "recall_gap":
+      // Missing facts - rephrase simpler to fill gap
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "active_revision",
+      };
+
+    case "confusion":
+      // Mixing concepts - needs clearer explanation
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "misconception_repair",
+      };
+
+    default:
+      // Default: rephrase simpler
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "active_revision",
+      };
+  }
 }
 
 /**
  * Handle incorrect answers
+ * Uses error_type for targeted intervention
  */
-function handleIncorrectAnswer(state: RevisionSessionState): DecisionResult {
+function handleIncorrectAnswer(
+  state: RevisionSessionState,
+  evaluation: Evaluation
+): DecisionResult {
   // Multiple failures - student needs confidence recovery
   if (state.attempts >= 3) {
     return {
@@ -102,11 +135,44 @@ function handleIncorrectAnswer(state: RevisionSessionState): DecisionResult {
     };
   }
 
-  // Still has attempts - retry with hint
-  return {
-    action: "RETRY_WITH_HINT",
-    phase: "active_revision",
-  };
+  // Use error type for targeted help
+  switch (evaluation.error_type) {
+    case "guessing":
+      // Student is lost - need to build from basics
+      if (state.attempts >= 2) {
+        return {
+          action: "RECOVER_CONFIDENCE",
+          phase: "panic_recovery",
+        };
+      }
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "active_revision",
+      };
+
+    case "concept_gap":
+      // Fundamental misunderstanding - needs repair
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "misconception_repair",
+      };
+
+    case "confusion":
+      // Mixing things up - clarify distinction
+      return {
+        action: "REPHRASE_SIMPLER",
+        phase: "misconception_repair",
+      };
+
+    case "recall_gap":
+    case "exam_technique":
+    default:
+      // Can likely get it with a hint
+      return {
+        action: "RETRY_WITH_HINT",
+        phase: "active_revision",
+      };
+  }
 }
 
 /**

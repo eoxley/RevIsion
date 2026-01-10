@@ -40,12 +40,12 @@ export type AgentPhase =
 export type EvaluationResult = "correct" | "partial" | "incorrect" | "unknown";
 export type EvaluationConfidence = "high" | "medium" | "low";
 export type ErrorType =
-  | "concept_gap"
-  | "calculation_error"
-  | "terminology_confusion"
-  | "incomplete_answer"
-  | "off_topic"
-  | "none";
+  | "recall_gap"      // Missing facts or definitions
+  | "concept_gap"     // Misunderstanding the idea
+  | "confusion"       // Mixing concepts
+  | "exam_technique"  // Poor structure, vague wording
+  | "guessing"        // Clearly uncertain or speculative
+  | null;             // No error (correct answers)
 
 export interface Evaluation {
   evaluation: EvaluationResult;

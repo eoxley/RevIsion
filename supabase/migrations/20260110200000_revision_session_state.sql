@@ -56,8 +56,8 @@ create table if not exists public.evaluation_log (
   evaluation text not null check (evaluation in ('correct', 'partial', 'incorrect', 'unknown')),
   confidence text not null check (confidence in ('high', 'medium', 'low')),
   error_type text check (error_type in (
-    'concept_gap', 'calculation_error', 'terminology_confusion',
-    'incomplete_answer', 'off_topic', 'none'
+    'recall_gap', 'concept_gap', 'confusion',
+    'exam_technique', 'guessing', null
   )),
 
   -- Context

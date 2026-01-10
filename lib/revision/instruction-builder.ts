@@ -102,8 +102,9 @@ MUST end with the question again.`;
 
     case "REPHRASE_SIMPLER":
       return `The student's answer was partially correct or showed confusion.
-${evaluation?.error_type === "terminology_confusion" ? "They seem confused about terminology." : ""}
+${evaluation?.error_type === "confusion" ? "They seem to be mixing up concepts." : ""}
 ${evaluation?.error_type === "concept_gap" ? "There may be a gap in understanding." : ""}
+${evaluation?.error_type === "recall_gap" ? "They may be missing some key facts." : ""}
 Rephrase the concept more simply.
 Use an analogy or everyday example.
 Then ask a simpler version of the question.
