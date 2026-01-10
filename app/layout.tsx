@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "revIsion - Study smarter, not harder",
+  title: "myrevisionary - Study smarter, not harder",
   description: "Discover how you learn best and get personalised GCSE revision tips that actually work for you.",
 };
 

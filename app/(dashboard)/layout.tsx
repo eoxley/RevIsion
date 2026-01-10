@@ -7,7 +7,7 @@ import { Logo } from "@/components/brand/logo";
  * Dashboard Layout
  *
  * Brand-compliant navigation with:
- * - revIsion logo (with distinct green I)
+ * - myrevisionary logo (brain-lightbulb with wordmark)
  * - Minimal navigation
  * - Neutral colors for inactive states
  * - revision-blue for active/primary states

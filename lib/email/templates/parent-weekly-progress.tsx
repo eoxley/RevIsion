@@ -104,7 +104,7 @@ export function ParentWeeklyProgressEmail({
         <div style={styles.container}>
           {/* Header */}
           <div style={styles.header}>
-            <h1 style={styles.logo}>revIsion</h1>
+            <h1 style={styles.logo}>myrevisionary</h1>
             <p style={styles.headerSubtitle}>Parent Progress Report</p>
           </div>
 
@@ -316,7 +316,7 @@ export function ParentWeeklyProgressEmail({
             <p style={styles.ctaText}>
               Want to see more details? View the full dashboard:
             </p>
-            <a href="https://revision.app/parent-dashboard" style={styles.ctaButton}>
+            <a href="https://myrevisionary.com/parent-dashboard" style={styles.ctaButton}>
               View Full Report
             </a>
           </div>
@@ -328,14 +328,14 @@ export function ParentWeeklyProgressEmail({
               Research shows that parental engagement significantly improves GCSE outcomes.
             </p>
             <p style={styles.footerLinks}>
-              <a href="https://revision.app/parent-settings" style={styles.footerLink}>Email Settings</a>
+              <a href="https://myrevisionary.com/parent-settings" style={styles.footerLink}>Email Settings</a>
               {' | '}
-              <a href="https://revision.app/help" style={styles.footerLink}>Help Centre</a>
+              <a href="https://myrevisionary.com/help" style={styles.footerLink}>Help Centre</a>
               {' | '}
-              <a href="https://revision.app/unsubscribe" style={styles.footerLink}>Unsubscribe</a>
+              <a href="https://myrevisionary.com/unsubscribe" style={styles.footerLink}>Unsubscribe</a>
             </p>
             <p style={styles.copyright}>
-              © 2026 revIsion. Helping GCSE students and their families succeed.
+              © 2026 myrevisionary. Helping GCSE students and their families succeed.
             </p>
           </div>
         </div>

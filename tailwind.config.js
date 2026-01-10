@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════
-        // revIsion Brand Colors (STRICT - from logo)
+        // myrevisionary Brand Colors (STRICT - from logo)
         // ═══════════════════════════════════════════════════════════════
 
         // Primary Blue - used for primary actions, headers, agent chat bubbles

@@ -23,7 +23,7 @@ export const resend = {
 };
 
 // Default sender - update this to your verified domain
-export const FROM_EMAIL = 'revIsion <noreply@resend.dev>';
+export const FROM_EMAIL = 'myrevisionary <noreply@resend.dev>';
 
 // For production, use your verified domain:
-// export const FROM_EMAIL = 'revIsion <noreply@revision.app>';
+// export const FROM_EMAIL = 'myrevisionary <noreply@myrevisionary.com>';

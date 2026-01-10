@@ -69,7 +69,7 @@ export function WeeklyProgressEmail({
         <div style={styles.container}>
           {/* Header */}
           <div style={styles.header}>
-            <h1 style={styles.logo}>revIsion</h1>
+            <h1 style={styles.logo}>myrevisionary</h1>
             <p style={styles.headerSubtitle}>Weekly Progress Report</p>
           </div>
 
@@ -188,7 +188,7 @@ export function WeeklyProgressEmail({
 
           {/* CTA */}
           <div style={styles.ctaSection}>
-            <a href="https://revision.app/dashboard" style={styles.ctaButton}>
+            <a href="https://myrevisionary.com/dashboard" style={styles.ctaButton}>
               Continue Revising
             </a>
           </div>
@@ -199,12 +199,12 @@ export function WeeklyProgressEmail({
               Keep going, {firstName}! Every session brings you closer to your goals.
             </p>
             <p style={styles.footerLinks}>
-              <a href="https://revision.app/settings" style={styles.footerLink}>Settings</a>
+              <a href="https://myrevisionary.com/settings" style={styles.footerLink}>Settings</a>
               {' | '}
-              <a href="https://revision.app/unsubscribe" style={styles.footerLink}>Unsubscribe</a>
+              <a href="https://myrevisionary.com/unsubscribe" style={styles.footerLink}>Unsubscribe</a>
             </p>
             <p style={styles.copyright}>
-              © 2026 revIsion. Helping GCSE students succeed.
+              © 2026 myrevisionary. Helping GCSE students succeed.
             </p>
           </div>
         </div>

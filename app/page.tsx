@@ -89,7 +89,7 @@ export default function Home() {
         {/* Features */}
         <div className="bg-neutral-50 rounded-3xl p-12 mb-16">
           <h2 className="text-3xl font-bold text-neutral-900 text-center mb-12">
-            Why students love <span className="text-revision-green-500">revIsion</span>
+            Why students love <span className="text-revision-green-500">myrevisionary</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
             <div className="text-center">
@@ -146,14 +146,28 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-neutral-900 text-neutral-400 py-8">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <footer className="bg-neutral-900 text-neutral-400">
+        <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-white font-semibold">rev</span>
-            <span className="text-revision-green-400 font-semibold">I</span>
-            <span className="text-white font-semibold">sion</span>
+            <span className="text-[#4A7C9B] font-semibold">my</span>
+            <span className="text-[#3AAA8A] font-semibold">revisionary</span>
           </div>
-          <p className="text-sm">&copy; 2025 revIsion. Helping students learn smarter.</p>
+          <p className="text-sm">&copy; 2025 myrevisionary. Helping students learn smarter.</p>
+        </div>
+
+        {/* Company Info Banner */}
+        <div className="border-t border-neutral-800 py-4">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-6 text-xs text-neutral-500">
+              <span>myrevisionary ltd — Company No. 1695473</span>
+              <span className="hidden md:inline">|</span>
+              <span>ICO Registration: ZB995810</span>
+              <span className="hidden md:inline">|</span>
+              <span>Professional Indemnity Insurance: Hiscox, £1,000,000 cover</span>
+              <span className="hidden md:inline">|</span>
+              <span>GDPR compliant, UK servers</span>
+            </div>
+          </div>
         </div>
       </footer>
     </main>

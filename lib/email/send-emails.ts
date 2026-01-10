@@ -290,13 +290,13 @@ export async function sendParentWelcomeEmail(data: WelcomeEmailData) {
     studyTips,
     nextSteps,
     enrolledSubjects: data.enrolledSubjects,
-    dashboardUrl: 'https://revision.app/parent-dashboard',
+    dashboardUrl: 'https://myrevisionary.com/parent-dashboard',
   });
 
   const { data: result, error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: data.parentEmail,
-    subject: `Welcome to revIsion! ${childFirstName}'s Learning Profile is Ready 🎉`,
+    subject: `Welcome to myrevisionary! ${childFirstName}'s Learning Profile is Ready`,
     react: emailComponent,
   });
 

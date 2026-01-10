@@ -199,7 +199,7 @@ export function OnboardingFlow({
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-                Who will be using revIsion?
+                Who will be using myrevisionary?
               </h2>
               <p className="text-neutral-500 text-sm">
                 Enter your child&apos;s name so we can personalise their experience

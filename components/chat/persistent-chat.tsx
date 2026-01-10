@@ -844,7 +844,7 @@ What do you need help with?`;
             </div>
             <div>
               <h3 className="font-semibold text-neutral-900">
-                {subjectContext ? subjectContext.subjectName : "revIsion Coach"}
+                {subjectContext ? subjectContext.subjectName : "myrevisionary Coach"}
               </h3>
               <p className="text-sm text-revision-green-600">
                 {subjectContext

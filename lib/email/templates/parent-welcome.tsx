@@ -56,13 +56,13 @@ export function ParentWelcomeEmail({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Welcome to revIsion - {childFirstName}&apos;s Learning Profile</title>
+        <title>Welcome to myrevisionary - {childFirstName}&apos;s Learning Profile</title>
       </head>
       <body style={styles.body}>
         <div style={styles.container}>
           {/* Header */}
           <div style={styles.header}>
-            <h1 style={styles.logo}>revIsion</h1>
+            <h1 style={styles.logo}>myrevisionary</h1>
             <div style={styles.headerBadge}>🎉 Welcome!</div>
           </div>
 
@@ -71,7 +71,7 @@ export function ParentWelcomeEmail({
             <h2 style={styles.welcomeTitle}>Hi {parentFirstName}!</h2>
             <p style={styles.welcomeText}>
               Great news! {childFirstName} has completed their learning style assessment
-              and is all set up on revIsion. We&apos;re excited to support their GCSE journey!
+              and is all set up on myrevisionary. We&apos;re excited to support their GCSE journey!
             </p>
           </div>
 
@@ -145,7 +145,7 @@ export function ParentWelcomeEmail({
           <div style={styles.stepsSection}>
             <h3 style={styles.sectionTitle}>🚀 What Happens Next</h3>
             <p style={styles.sectionSubtitle}>
-              Here&apos;s how revIsion will help {childFirstName} get exam-ready:
+              Here&apos;s how myrevisionary will help {childFirstName} get exam-ready:
             </p>
             <div style={styles.stepsList}>
               {nextSteps.map((step, index) => (
@@ -232,12 +232,12 @@ export function ParentWelcomeEmail({
               We&apos;re here to help {childFirstName} succeed! 💪
             </p>
             <p style={styles.footerLinks}>
-              <a href="https://revision.app/help" style={styles.footerLink}>Help Centre</a>
+              <a href="https://myrevisionary.com/help" style={styles.footerLink}>Help Centre</a>
               {' | '}
-              <a href="https://revision.app/parent-settings" style={styles.footerLink}>Email Settings</a>
+              <a href="https://myrevisionary.com/parent-settings" style={styles.footerLink}>Email Settings</a>
             </p>
             <p style={styles.copyright}>
-              © 2026 revIsion. Helping GCSE students and their families succeed.
+              © 2026 myrevisionary. Helping GCSE students and their families succeed.
             </p>
           </div>
         </div>
