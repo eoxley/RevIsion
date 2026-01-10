@@ -7,8 +7,9 @@
  * 1. Load session state
  * 2. Call combined agent (evaluates + tutors in one call)
  * 3. Update state based on evaluation
- * 4. Stream tutor response
- * 5. Persist everything
+ * 4. Update revision progress (learning evidence)
+ * 5. Stream tutor response
+ * 6. Persist everything
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -22,6 +23,10 @@ import {
   type RevisionSessionState,
   type LearningStyle,
   type ActionType,
+  type RevisionProgress,
+  type UnderstandingState,
+  type DeliveryTechnique,
+  type EvaluationResult,
 } from "@/lib/revision";
 
 interface RequestBody {
@@ -29,6 +34,7 @@ interface RequestBody {
   session_id: string;
   topic_id?: string;
   topic_name?: string;
+  subject_id?: string;
   subject_code?: string;
   subject_name?: string;
   learning_style?: LearningStyle;
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
       session_id,
       topic_id,
       topic_name,
+      subject_id,
       subject_code,
       subject_name,
       learning_style,
@@ -125,6 +132,22 @@ export async function POST(req: NextRequest) {
     // Persist updated state
     await saveSessionState(supabase, updatedState);
 
+    // ═══════════════════════════════════════════════════════════
+    // UPDATE REVISION PROGRESS (LEARNING EVIDENCE)
+    // ═══════════════════════════════════════════════════════════
+
+    // Only track progress if there was a real evaluation
+    if (result.evaluation.evaluation !== "unknown") {
+      await updateRevisionProgress(supabase, {
+        student_id: user.id,
+        session_id,
+        subject_id: subject_id || null,
+        topic_id: sessionState.topic_id,
+        evaluation: result.evaluation.evaluation as EvaluationResult,
+        usedTechniques: result.usedTechniques,
+      });
+    }
+
     // Log evaluation if it was a real evaluation
     if (result.evaluation.evaluation !== "unknown") {
       await logEvaluation(supabase, {
@@ -176,6 +199,7 @@ export async function POST(req: NextRequest) {
         "X-Evaluation": result.evaluation.evaluation,
         "X-Confidence": result.evaluation.confidence,
         "X-Error-Type": result.evaluation.error_type || "none",
+        "X-Delivery-Modes": result.usedTechniques.join(",") || "none",
       },
     });
   } catch (error) {
@@ -292,5 +316,113 @@ async function logEvaluation(
 
   if (error) {
     console.error("Failed to log evaluation:", error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REVISION PROGRESS TRACKING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface ProgressUpdateInput {
+  student_id: string;
+  session_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
+  evaluation: EvaluationResult;
+  usedTechniques: DeliveryTechnique[];
+}
+
+/**
+ * Calculate understanding state based on correct count
+ */
+function calculateUnderstandingState(correctCount: number): UnderstandingState {
+  if (correctCount >= 2) {
+    return "secure";
+  } else if (correctCount === 1) {
+    return "strengthening";
+  }
+  return "building";
+}
+
+/**
+ * Update revision progress after evaluation
+ *
+ * This happens in ONE place:
+ * After evaluator runs, before tutor responds
+ */
+async function updateRevisionProgress(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  input: ProgressUpdateInput
+): Promise<void> {
+  const { student_id, session_id, subject_id, topic_id, evaluation, usedTechniques } = input;
+
+  // Load existing progress
+  const { data: existingProgress } = await supabase
+    .from("revision_progress")
+    .select("*")
+    .eq("student_id", student_id)
+    .eq("session_id", session_id)
+    .eq("topic_id", topic_id)
+    .single();
+
+  if (existingProgress) {
+    // Update existing progress
+    const newAttempts = existingProgress.attempts + 1;
+    const newCorrectCount =
+      evaluation === "correct"
+        ? existingProgress.correct_count + 1
+        : existingProgress.correct_count;
+    const newIncorrectCount =
+      evaluation === "incorrect"
+        ? existingProgress.incorrect_count + 1
+        : existingProgress.incorrect_count;
+    const newPartialCount =
+      evaluation === "partial"
+        ? existingProgress.partial_count + 1
+        : existingProgress.partial_count;
+
+    // Merge delivery modes (unique)
+    const existingModes: string[] = existingProgress.delivery_modes_used || [];
+    const allModes = new Set([...existingModes, ...usedTechniques]);
+
+    const { error } = await supabase
+      .from("revision_progress")
+      .update({
+        attempts: newAttempts,
+        correct_count: newCorrectCount,
+        incorrect_count: newIncorrectCount,
+        partial_count: newPartialCount,
+        last_evaluation: evaluation,
+        understanding_state: calculateUnderstandingState(newCorrectCount),
+        delivery_modes_used: Array.from(allModes),
+        last_interaction_at: new Date().toISOString(),
+      })
+      .eq("id", existingProgress.id);
+
+    if (error) {
+      console.error("Failed to update revision progress:", error);
+    }
+  } else {
+    // Create new progress record
+    const newProgress: Partial<RevisionProgress> = {
+      student_id,
+      session_id,
+      subject_id,
+      topic_id,
+      attempts: 1,
+      correct_count: evaluation === "correct" ? 1 : 0,
+      incorrect_count: evaluation === "incorrect" ? 1 : 0,
+      partial_count: evaluation === "partial" ? 1 : 0,
+      last_evaluation: evaluation,
+      understanding_state: evaluation === "correct" ? "strengthening" : "building",
+      delivery_modes_used: usedTechniques,
+      last_interaction_at: new Date().toISOString(),
+    };
+
+    const { error } = await supabase.from("revision_progress").insert(newProgress);
+
+    if (error) {
+      console.error("Failed to create revision progress:", error);
+    }
   }
 }

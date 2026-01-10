@@ -22,6 +22,12 @@ import type {
   LearningStyle,
   ActionType,
 } from "./types";
+import {
+  getAllowedTechniques,
+  buildTechniqueInstructions,
+  detectUsedTechniques,
+  type DeliveryTechnique,
+} from "./delivery-techniques";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -43,14 +49,18 @@ interface CombinedAgentOutput {
   evaluation: Evaluation;
   tutorMessage: string;
   determinedAction: ActionType;
+  allowedTechniques: DeliveryTechnique[];
+  usedTechniques: DeliveryTechnique[];
 }
 
 /**
  * Build the combined agent system prompt
  */
 function buildCombinedSystemPrompt(
-  learningStyle: LearningStyle | null
+  learningStyle: LearningStyle | null,
+  allowedTechniques: DeliveryTechnique[]
 ): string {
+  const techniqueInstructions = buildTechniqueInstructions(allowedTechniques);
   const styleGuidance = learningStyle
     ? buildStyleGuidance(learningStyle)
     : "Use clear, simple language appropriate for GCSE level.";
@@ -188,8 +198,15 @@ TUTOR RULES (NON-NEGOTIABLE)
 - You MUST NOT explain fully unless in RECOVER_CONFIDENCE
 - You MUST follow the action rules precisely
 - You MUST adapt delivery to the learning style
+- You MUST ONLY use allowed delivery techniques
 
 ${styleGuidance}
+
+═══════════════════════════════════════════════════════════
+DELIVERY TECHNIQUES (ENFORCED)
+═══════════════════════════════════════════════════════════
+
+${techniqueInstructions}
 
 ═══════════════════════════════════════════════════════════
 TUTOR OUTPUT FORMAT
@@ -366,7 +383,10 @@ function determineAction(
 export async function runCombinedAgent(
   input: CombinedAgentInput
 ): Promise<CombinedAgentOutput> {
-  const systemPrompt = buildCombinedSystemPrompt(input.learningStyle);
+  // Get allowed techniques based on learning style
+  const allowedTechniques = getAllowedTechniques(input.learningStyle);
+
+  const systemPrompt = buildCombinedSystemPrompt(input.learningStyle, allowedTechniques);
   const userPrompt = buildUserPrompt(input);
 
   // Build messages
@@ -423,10 +443,15 @@ export async function runCombinedAgent(
     !!input.question
   );
 
+  // Detect which techniques were actually used
+  const usedTechniques = detectUsedTechniques(tutorMessage);
+
   return {
     evaluation,
     tutorMessage,
     determinedAction,
+    allowedTechniques,
+    usedTechniques,
   };
 }
 

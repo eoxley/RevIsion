@@ -123,3 +123,29 @@ export interface TopicContext {
   difficulty_level: number;
   prerequisites: string[];
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REVISION PROGRESS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export type UnderstandingState = "building" | "strengthening" | "secure";
+
+export interface RevisionProgress {
+  id?: string;
+  student_id: string;
+  session_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
+
+  attempts: number;
+  correct_count: number;
+  incorrect_count: number;
+  partial_count: number;
+  last_evaluation: EvaluationResult | null;
+  understanding_state: UnderstandingState;
+
+  delivery_modes_used: string[];
+
+  created_at?: string;
+  last_interaction_at?: string;
+}

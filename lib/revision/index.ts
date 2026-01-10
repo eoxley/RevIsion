@@ -46,6 +46,15 @@ export {
   responseHasQuestion,
 } from "./combined-agent";
 
+export {
+  getAllowedTechniques,
+  buildTechniqueInstructions,
+  detectUsedTechniques,
+  parseFlashcards,
+  deliveryTechniques,
+  techniqueBehavior,
+} from "./delivery-techniques";
+
 export type {
   ActionType,
   AgentPhase,
@@ -58,4 +67,11 @@ export type {
   ControllerOutput,
   LearningStyle,
   TopicContext,
+  RevisionProgress,
+  UnderstandingState,
 } from "./types";
+
+export type {
+  DeliveryTechnique,
+  Flashcard,
+} from "./delivery-techniques";
