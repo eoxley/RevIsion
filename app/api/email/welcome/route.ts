@@ -37,7 +37,14 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendWelcomeEmailForStudent(studentId: string, parentEmail?: string) {
-  // Get student profile
+  // Get auth user to get parent's email
+  const { data: authData, error: authError } = await supabase.auth.admin.getUserById(studentId);
+
+  if (authError || !authData.user) {
+    throw new Error('User not found');
+  }
+
+  // Get student profile (child's info)
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
@@ -47,6 +54,9 @@ async function sendWelcomeEmailForStudent(studentId: string, parentEmail?: strin
   if (profileError || !profile) {
     throw new Error('Student not found');
   }
+
+  // Parent email comes from auth user (they registered with their email)
+  const parentEmailAddress = parentEmail || authData.user.email;
 
   // Get VARK profile
   const { data: varkProfile, error: varkError } = await supabase
@@ -166,10 +176,15 @@ async function sendWelcomeEmailForStudent(studentId: string, parentEmail?: strin
     })
     .filter((name): name is string => Boolean(name)) || ['Maths', 'English Language', 'English Literature'];
 
+  // Get parent's name from auth user metadata (set during registration)
+  const parentName = authData.user.user_metadata?.first_name
+    ? `${authData.user.user_metadata.first_name} ${authData.user.user_metadata.last_name || ''}`.trim()
+    : 'Parent/Guardian';
+
   // Prepare email data
   const emailData = {
-    parentEmail: parentEmail || profile.email, // Use student email if no parent email
-    parentName: 'Parent/Guardian', // Would come from parent profile
+    parentEmail: parentEmailAddress || profile.email,
+    parentName,
     childName: `${profile.first_name} ${profile.last_name || ''}`.trim(),
     primaryStyles,
     isMultimodal,

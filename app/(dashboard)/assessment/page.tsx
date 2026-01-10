@@ -177,6 +177,15 @@ export default function AssessmentPage() {
       return;
     }
 
+    // Send welcome email to parent (non-blocking)
+    fetch("/api/email/welcome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: user.id }),
+    }).catch((err) => {
+      console.error("Failed to send welcome email:", err);
+    });
+
     router.push(`/results/${savedResult.id}`);
   }
 

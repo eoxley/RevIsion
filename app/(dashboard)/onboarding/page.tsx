@@ -5,9 +5,10 @@ import { OnboardingFlow } from "./onboarding-flow";
 /**
  * Onboarding Page
  *
- * Two-step onboarding:
- * 1. Subject selection - pick your GCSE subjects
- * 2. Learning style quiz - discover how you learn best
+ * Three-step onboarding:
+ * 1. Child details - enter child's name
+ * 2. Subject selection - pick GCSE subjects
+ * 3. Learning style quiz - discover how they learn best
  *
  * After completion, redirects to dashboard.
  */
@@ -26,7 +27,7 @@ export default async function OnboardingPage() {
   // Check if already completed onboarding
   const { data: profile } = await supabase
     .from("profiles")
-    .select("subjects_selected, first_name")
+    .select("subjects_selected, first_name, last_name")
     .eq("id", user.id)
     .single();
 
@@ -54,11 +55,13 @@ export default async function OnboardingPage() {
     }
   ).filter(Boolean) || [];
 
-  // Determine which step they're on
+  // Determine which steps are complete
+  const hasChildName = !!(profile?.first_name && profile.first_name.trim());
   const hasSubjects = currentSubjects.length > 0;
   const hasLearningStyle = !!result;
 
-  // If fully complete, redirect to dashboard
+  // If subjects and learning style complete, redirect to dashboard
+  // (don't require child name for existing users who completed before parent flow)
   if (hasSubjects && hasLearningStyle) {
     redirect("/dashboard");
   }
@@ -70,6 +73,7 @@ export default async function OnboardingPage() {
         hasSubjects={hasSubjects}
         hasLearningStyle={hasLearningStyle}
         currentSubjects={currentSubjects}
+        hasChildName={hasChildName}
       />
     </div>
   );
