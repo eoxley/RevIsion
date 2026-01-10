@@ -1,11 +1,17 @@
+/**
+ * Auth Layout
+ *
+ * Minimal layout for authentication pages.
+ * Uses neutral background for calm appearance.
+ */
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">{children}</div>
+    <div className="min-h-screen bg-neutral-50">
+      {children}
     </div>
   );
 }

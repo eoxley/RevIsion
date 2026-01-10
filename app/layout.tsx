@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RevIsion - Discover Your Learning Style",
-  description: "Identify your VARK learning style with our comprehensive assessment tool designed for students.",
+  title: "revIsion - Study smarter, not harder",
+  description: "Discover how you learn best and get personalised GCSE revision tips that actually work for you.",
 };
 
 export default function RootLayout({

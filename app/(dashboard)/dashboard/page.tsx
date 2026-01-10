@@ -1,178 +1,162 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { PersistentChat } from "@/components/chat/persistent-chat";
+import {
+  ProgressSidebar,
+  ProgressSidebarCompact,
+} from "@/components/dashboard/progress-sidebar";
+import Link from "next/link";
+
+/**
+ * Main Dashboard - Phase 2
+ *
+ * Chat-first layout with the chat interface as the PRIMARY surface.
+ * Sidebar shows only schema-backed progress indicators.
+ *
+ * Layout:
+ * - Primary area: Chat interface (central focus)
+ * - Secondary area: Progress sidebar (right side on desktop)
+ *
+ * Data Sources:
+ * - User: auth.users via Supabase Auth
+ * - Profile: profiles table
+ * - Learning Style: results table (latest assessment)
+ * - Subjects: student_subjects + subjects tables
+ * - Sessions: learning_sessions table (count only)
+ *
+ * Brand:
+ * - Plenty of whitespace
+ * - No clutter
+ * - No dashboard widgets
+ * - No metrics unless schema-backed
+ */
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  // Get user's results
-  const { data: results } = await supabase
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null; // Middleware will redirect
+  }
+
+  // Fetch profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name")
+    .eq("id", user.id)
+    .single();
+
+  // Fetch latest learning style result
+  const { data: latestResult } = await supabase
     .from("results")
-    .select("*, assessments(*)")
-    .eq("user_id", user?.id)
-    .order("calculated_at", { ascending: false });
+    .select("*")
+    .eq("user_id", user.id)
+    .order("calculated_at", { ascending: false })
+    .limit(1)
+    .single();
 
-  const latestResult = results?.[0];
-  const totalAssessments = results?.length || 0;
+  // Build learning profile if available
+  const learningProfile = latestResult
+    ? {
+        visual: latestResult.visual_percentage,
+        auditory: latestResult.auditory_percentage,
+        readWrite: latestResult.read_write_percentage,
+        kinesthetic: latestResult.kinesthetic_percentage,
+        primaryStyles: latestResult.primary_styles,
+        isMultimodal: latestResult.is_multimodal,
+      }
+    : null;
 
-  // Determine primary learning style from latest result
-  const primaryStyle = latestResult?.primary_styles?.[0];
-  const styleColors: Record<string, string> = {
-    visual: "text-blue-600 bg-blue-50",
-    auditory: "text-green-600 bg-green-50",
-    read_write: "text-yellow-600 bg-yellow-50",
-    kinesthetic: "text-red-600 bg-red-50",
-  };
+  // Fetch student's enrolled subjects
+  const { data: studentSubjects } = await supabase
+    .from("student_subjects")
+    .select(
+      `
+      *,
+      subjects (
+        id,
+        code,
+        display_name,
+        category
+      )
+    `
+    )
+    .eq("student_id", user.id)
+    .order("priority_level", { ascending: true });
+
+  // Count completed sessions
+  const { count: sessionCount } = await supabase
+    .from("learning_sessions")
+    .select("*", { count: "exact", head: true })
+    .eq("student_id", user.id)
+    .eq("completion_status", "completed");
+
+  const studentName = profile?.first_name || undefined;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-slate-600 mt-1">
-          Track your learning style and progress
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-slate-500">
-              Total Assessments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalAssessments}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-slate-500">
-              Primary Learning Style
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {primaryStyle ? (
-              <span
-                className={`inline-block px-3 py-1 rounded-full text-lg font-semibold capitalize ${
-                  styleColors[primaryStyle] || "bg-slate-100"
-                }`}
-              >
-                {primaryStyle.replace("_", "/")}
-              </span>
-            ) : (
-              <p className="text-slate-400">Take an assessment to find out</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-slate-500">
-              Last Assessment
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {latestResult ? (
-              <p className="text-lg">
-                {new Date(latestResult.calculated_at).toLocaleDateString()}
-              </p>
-            ) : (
-              <p className="text-slate-400">No assessments yet</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Latest Result Summary */}
-      {latestResult && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Learning Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
-                  {latestResult.visual_percentage}%
-                </div>
-                <p className="text-sm text-slate-600">Visual</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
-                  {latestResult.auditory_percentage}%
-                </div>
-                <p className="text-sm text-slate-600">Auditory</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">
-                  {latestResult.read_write_percentage}%
-                </div>
-                <p className="text-sm text-slate-600">Read/Write</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-600">
-                  {latestResult.kinesthetic_percentage}%
-                </div>
-                <p className="text-sm text-slate-600">Kinesthetic</p>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-center">
-              <Link href={`/results/${latestResult.id}`}>
-                <Button variant="outline">View Full Results</Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* RevisionAI CTA */}
-      {latestResult && (
-        <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0">
-          <CardContent className="py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="text-4xl">🤖</div>
-                <div>
-                  <h3 className="text-xl font-bold">RevisionAI</h3>
-                  <p className="text-purple-100">
-                    Get personalized study advice from your AI coach
-                  </p>
-                </div>
-              </div>
-              <Link href="/revision-ai">
-                <Button className="bg-white text-purple-600 hover:bg-purple-50">
-                  Chat Now
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* CTA */}
-      <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
-        <CardContent className="py-8 text-center">
-          <h2 className="text-2xl font-bold mb-2">
-            {totalAssessments === 0
-              ? "Ready to discover your learning style?"
-              : "Take another assessment"}
-          </h2>
-          <p className="text-blue-100 mb-6">
-            {totalAssessments === 0
-              ? "Complete our 32-question VARK assessment to understand how you learn best."
-              : "Track how your learning preferences change over time."}
+    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
+      {/* Main Content - Chat Interface (Primary) */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <div className="mb-4">
+          <h1 className="text-2xl font-semibold text-neutral-900">
+            {studentName ? `Hey ${studentName}` : "Hey there"}
+          </h1>
+          <p className="text-neutral-500 mt-1">
+            {learningProfile
+              ? `Your ${learningProfile.primaryStyles[0]?.replace("_", "/")} learning style coach is here to help`
+              : "Ready to smash your revision?"}
           </p>
-          <Link href="/assessment">
-            <Button className="bg-white text-blue-600 hover:bg-blue-50">
-              Start Assessment
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Learning style prompt if not completed */}
+        {!learningProfile && (
+          <div className="mb-4 p-4 bg-revision-blue-50 border border-revision-blue-100 rounded-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-revision-blue-800">
+                  Let's find out how you learn best
+                </p>
+                <p className="text-xs text-revision-blue-600 mt-0.5">
+                  Quick quiz to unlock personalised revision tips
+                </p>
+              </div>
+              <Link
+                href="/assessment"
+                className="px-4 py-2 bg-revision-blue-600 text-white text-sm font-medium rounded-lg hover:bg-revision-blue-700 transition"
+              >
+                Take the quiz
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Chat Interface - Primary Surface */}
+        <div className="flex-1">
+          <PersistentChat learningProfile={learningProfile} studentName={studentName} />
+        </div>
+      </main>
+
+      {/* Progress Sidebar - Desktop only */}
+      <div className="hidden lg:block">
+        <ProgressSidebar
+          studentSubjects={studentSubjects || []}
+          learningProfile={learningProfile}
+          sessionCount={sessionCount || 0}
+          studentName={studentName}
+        />
+      </div>
+
+      {/* Compact Progress - Mobile only */}
+      <div className="lg:hidden">
+        <ProgressSidebarCompact
+          learningProfile={learningProfile}
+          sessionCount={sessionCount || 0}
+        />
+      </div>
     </div>
   );
 }

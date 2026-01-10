@@ -6,8 +6,27 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Logo } from "@/components/brand/logo";
 
+/**
+ * Login Page - Phase 1
+ *
+ * Brand-compliant login with:
+ * - Centered logo
+ * - Minimal layout with calm blue/green accents
+ * - Real Supabase authentication
+ * - Secure redirect on success
+ *
+ * Auth Flow:
+ * 1. User enters email + password
+ * 2. Supabase auth.signInWithPassword validates credentials
+ * 3. On success: redirect to /dashboard
+ * 4. On error: display error in neutral tones (no red)
+ *
+ * User → StudentProfile Mapping:
+ * - auth.users.id maps to profiles.id (1:1 via trigger)
+ * - profile created automatically on signup via database trigger
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -22,64 +41,105 @@ export default function LoginPage() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(authError.message);
       setLoading(false);
       return;
     }
 
+    // Successful login - redirect to dashboard
     router.push("/dashboard");
     router.refresh();
   };
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <Link href="/" className="text-2xl font-bold text-slate-900 mb-2">
-          RevIsion
-        </Link>
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Sign in to continue your learning journey</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleLogin} className="space-y-4">
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-              {error}
+    <div className="min-h-screen bg-neutral-50 flex flex-col">
+      {/* Main content - centered */}
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Logo - centered */}
+          <div className="flex flex-col items-center space-y-2">
+            <Logo size="xl" />
+            <p className="text-sm text-neutral-500">
+              Your personal GCSE revision coach
+            </p>
+          </div>
+
+          {/* Login form */}
+          <div className="bg-white rounded-2xl border border-neutral-200 p-8 shadow-sm">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h1 className="text-xl font-semibold text-neutral-900">
+                  Welcome back
+                </h1>
+                <p className="mt-1 text-sm text-neutral-500">
+                  Sign in to continue your learning journey
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                {/* Error message - neutral styling, no red */}
+                {error && (
+                  <div className="bg-neutral-100 border border-neutral-200 text-neutral-700 px-4 py-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <Input
+                  id="email"
+                  label="Email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+
+                <Input
+                  id="password"
+                  label="Password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? "Signing in..." : "Sign in"}
+                </Button>
+              </form>
+
+              <p className="text-center text-sm text-neutral-600">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/register"
+                  className="text-revision-blue-600 hover:text-revision-blue-700 font-medium"
+                >
+                  Sign up
+                </Link>
+              </p>
             </div>
-          )}
-          <Input
-            label="Email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
-          </Button>
-        </form>
-        <p className="mt-4 text-center text-sm text-slate-600">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
-            Sign up
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+          </div>
+
+          {/* Footer text */}
+          <p className="text-center text-xs text-neutral-400">
+            Built for UK GCSE students preparing for 2026 exams
+          </p>
+        </div>
+      </main>
+    </div>
   );
 }

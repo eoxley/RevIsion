@@ -83,30 +83,29 @@ export default async function ResultsPage({ params }: PageProps) {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-900">Your VARK Results</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Here's how you learn best</h1>
         <p className="text-slate-600 mt-2">
-          Assessment completed on{" "}
-          {new Date(result.calculated_at).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
+          Quiz completed{" "}
+          {new Date(result.calculated_at).toLocaleDateString("en-GB", {
             day: "numeric",
+            month: "long",
+            year: "numeric",
           })}
         </p>
       </div>
 
       {/* Primary Style Banner */}
-      <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
+      <Card className="bg-gradient-to-r from-revision-green-500 to-revision-green-600 text-white border-0">
         <CardContent className="py-8 text-center">
-          <p className="text-blue-100 text-sm uppercase tracking-wide mb-2">
-            Your primary learning style{result.is_multimodal ? "s" : ""}
+          <p className="text-revision-green-100 text-sm uppercase tracking-wide mb-2">
+            You're a{result.is_multimodal ? " multi-style" : "n"}{!result.is_multimodal && ` ${result.primary_styles[0]?.replace("_", "/")} `}learner
           </p>
           <h2 className="text-4xl font-bold">
             {result.primary_styles.map(getStyleLabel).join(" + ")}
           </h2>
           {result.is_multimodal && (
-            <p className="text-blue-100 mt-2">
-              You are a multimodal learner who benefits from multiple approaches
+            <p className="text-revision-green-100 mt-2">
+              You learn best when you mix up your revision techniques
             </p>
           )}
         </CardContent>
@@ -211,10 +210,10 @@ export default async function ResultsPage({ params }: PageProps) {
       {/* Actions */}
       <div className="flex justify-center gap-4">
         <Link href="/dashboard">
-          <Button variant="outline">Back to Dashboard</Button>
+          <Button variant="outline">Start revising</Button>
         </Link>
         <Link href="/assessment">
-          <Button>Take Another Assessment</Button>
+          <Button className="bg-revision-green-500 hover:bg-revision-green-600">Retake the quiz</Button>
         </Link>
       </div>
     </div>

@@ -25,21 +25,21 @@ export default function Home() {
 
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-5xl font-bold text-slate-900 mb-6">
-            Discover How You Learn Best
+            Study smarter, not harder
           </h2>
           <p className="text-xl text-slate-600 mb-10">
-            Take our comprehensive VARK assessment to understand your unique learning style.
-            Get personalized study strategies that work for you.
+            Everyone learns differently. Take a quick quiz to discover your unique learning style
+            and get revision tips that actually work for you.
           </p>
           <Link
             href="/register"
             className="inline-block bg-blue-600 text-white text-lg px-8 py-4 rounded-lg hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
           >
-            Start Your Assessment
+            Let's find out about you
           </Link>
         </div>
 
-        {/* VARK Cards */}
+        {/* Learning Style Cards */}
         <div className="grid md:grid-cols-4 gap-6 mt-20">
           <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">

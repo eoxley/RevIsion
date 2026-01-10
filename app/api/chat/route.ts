@@ -17,9 +17,11 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, varkProfile, selectedSubjects } = await req.json();
+    const { messages, learningProfile, varkProfile, selectedSubjects } = await req.json();
+    // Support both learningProfile and varkProfile for backwards compatibility
+    const profile = learningProfile || varkProfile;
 
-    const systemPrompt = createSystemPrompt(varkProfile, selectedSubjects);
+    const systemPrompt = createSystemPrompt(profile, selectedSubjects);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-interface VARKProfile {
+interface LearningProfile {
   visual: number;
   auditory: number;
   readWrite: number;
@@ -220,7 +222,7 @@ WHEN CREATING A REVISION PLAN:
 2. Ask which subjects they're taking
 3. Ask about current confidence levels in each
 4. Ask about their available study time per day
-5. Consider their VARK learning style
+5. Consider their learning style
 6. Build in breaks, variety, and realistic goals
 7. Prioritise weak areas but maintain strong ones
 8. Include past paper practice (especially for kinesthetic learners)
@@ -228,7 +230,7 @@ WHEN CREATING A REVISION PLAN:
 10. Build in buffer time for catching up`;
 }
 
-function createSystemPrompt(varkProfile: VARKProfile | null, selectedSubjects?: string[]) {
+function createSystemPrompt(learningProfile: LearningProfile | null, selectedSubjects?: string[]) {
   // Get live curriculum data
   const curriculumSummary = getCurriculumSummary();
 
@@ -271,7 +273,7 @@ YOUR CORE CAPABILITIES
 ═══════════════════════════════════════════════════════════
 1. CREATE REVISION PLANS tailored to time available and learning style
 2. EXPLAIN TOPICS using knowledge banks adapted to how the student learns
-3. SUGGEST REVISION TECHNIQUES matched to their VARK profile
+3. SUGGEST REVISION TECHNIQUES matched to how they learn
 4. RECOMMEND RESOURCES appropriate for their learning style
 5. PROVIDE EXAM TECHNIQUE for specific question types
 6. QUIZ AND TEST the student on topics
@@ -600,7 +602,7 @@ Your job is to choose the most effective FORMAT — not just the content.
 
 STEP 1 — SELECT THE TECHNIQUE
 For each session, choose ONE primary technique based on:
-- The student's preferred learning style (from VARK)
+- The student's preferred learning style
 - Current understanding level of the topic
 - Recent engagement patterns
 
@@ -808,25 +810,25 @@ NEVER:
 
 ALWAYS ASK for their exam board if giving subject-specific advice to ensure accuracy.`;
 
-  if (!varkProfile) {
+  if (!learningProfile) {
     return `${basePrompt}
 
 ═══════════════════════════════════════════════════════════
-NO VARK PROFILE YET
+LEARNING STYLE NOT SET YET
 ═══════════════════════════════════════════════════════════
-The student hasn't completed their VARK assessment yet.
+This student hasn't taken the learning style quiz yet.
 
 APPROACH:
 1. You can still help with general revision advice and subject questions
-2. Gently encourage them to take the VARK assessment for personalised advice
+2. Gently suggest they take the quick quiz for personalised tips
 3. Ask about their subjects and exam boards
 4. Offer to create a basic revision plan
-5. Explain concepts in multiple ways (visual, verbal, practical) until you learn what works
+5. Explain concepts in multiple ways until you figure out what clicks
 
-Say something like: "I can help you right away! Though if you take the quick learning style quiz, I can give you advice that's perfectly matched to how YOUR brain works best."`;
+Say something like: "Happy to help right now! If you take the quick learning style quiz, I can give you tips that work perfectly for YOUR brain."`;
   }
 
-  const { visual, auditory, readWrite, kinesthetic, primaryStyles, isMultimodal } = varkProfile;
+  const { visual, auditory, readWrite, kinesthetic, primaryStyles, isMultimodal } = learningProfile;
 
   // Determine strength levels
   const getStrength = (score: number) => {
@@ -993,7 +995,7 @@ ${primaryStyles.includes("kinesthetic") ? "- Physically cross off completed ques
   return `${basePrompt}
 
 ═══════════════════════════════════════════════════════════
-THIS STUDENT'S VARK PROFILE
+THIS STUDENT'S LEARNING PROFILE
 ═══════════════════════════════════════════════════════════
 Visual:      ${visual}% ${visual >= 25 ? "★".repeat(Math.floor(visual/10)) : ""}
 Auditory:    ${auditory}% ${auditory >= 25 ? "★".repeat(Math.floor(auditory/10)) : ""}
