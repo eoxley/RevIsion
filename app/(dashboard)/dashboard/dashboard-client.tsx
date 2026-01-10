@@ -138,11 +138,34 @@ export function DashboardClient({
         )}
 
         {/* Subject Cards - Show when not in subject context */}
-        {!subjectContext && studentSubjects.length > 0 && (
-          <SubjectCards
-            studentSubjects={studentSubjects}
-            onSubjectClick={handleSubjectClick}
-          />
+        {!subjectContext && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-neutral-600">Your Subjects</h2>
+              <Link
+                href="/onboarding?edit=subjects"
+                className="text-xs text-revision-green-600 hover:text-revision-green-700 font-medium"
+              >
+                Edit subjects
+              </Link>
+            </div>
+            {studentSubjects.length > 0 ? (
+              <SubjectCards
+                studentSubjects={studentSubjects}
+                onSubjectClick={handleSubjectClick}
+              />
+            ) : (
+              <Link
+                href="/onboarding?edit=subjects"
+                className="block p-6 border-2 border-dashed border-neutral-200 rounded-xl text-center hover:border-revision-green-300 transition"
+              >
+                <p className="text-neutral-500">No subjects selected yet</p>
+                <p className="text-sm text-revision-green-600 font-medium mt-1">
+                  Click to add subjects
+                </p>
+              </Link>
+            )}
+          </div>
         )}
 
         {/* Chat Interface */}

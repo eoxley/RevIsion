@@ -136,8 +136,7 @@ export function SubjectCards({ studentSubjects, onSubjectClick }: SubjectCardsPr
   }
 
   return (
-    <div className="mb-6">
-      <h2 className="text-sm font-medium text-neutral-600 mb-3">Your Subjects</h2>
+    <div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {studentSubjects.map((ss) => {
           const subject = ss.subjects;

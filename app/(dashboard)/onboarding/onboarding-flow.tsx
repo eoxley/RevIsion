@@ -14,6 +14,7 @@ interface OnboardingFlowProps {
   hasLearningStyle: boolean;
   currentSubjects: string[];
   hasChildName?: boolean;
+  editMode?: string;
 }
 
 export function OnboardingFlow({
@@ -22,11 +23,14 @@ export function OnboardingFlow({
   hasLearningStyle,
   currentSubjects,
   hasChildName = false,
+  editMode,
 }: OnboardingFlowProps) {
   const router = useRouter();
 
-  // Determine initial step based on what's already completed
+  // Determine initial step based on what's already completed or edit mode
   const getInitialStep = () => {
+    // If editing subjects, go straight to subjects step
+    if (editMode === "subjects") return "subjects";
     if (!hasChildName && !firstName) return "child-details";
     if (!hasSubjects) return "subjects";
     return "learning-style";
@@ -35,6 +39,7 @@ export function OnboardingFlow({
   const [step, setStep] = useState<"child-details" | "subjects" | "learning-style">(
     getInitialStep()
   );
+  const isEditMode = !!editMode;
   const [isLoading, setIsLoading] = useState(false);
   const [childFirstName, setChildFirstName] = useState(firstName || "");
   const [childLastName, setChildLastName] = useState("");
@@ -76,7 +81,12 @@ export function OnboardingFlow({
       });
 
       if (response.ok) {
-        setStep("learning-style");
+        // If editing, go back to dashboard; otherwise continue to learning style
+        if (isEditMode) {
+          router.push("/dashboard");
+        } else {
+          setStep("learning-style");
+        }
       }
     } catch (error) {
       console.error("Failed to save subjects:", error);

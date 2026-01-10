@@ -11,9 +11,18 @@ import { OnboardingFlow } from "./onboarding-flow";
  * 3. Learning style quiz - discover how they learn best
  *
  * After completion, redirects to dashboard.
+ *
+ * Query params:
+ * - ?edit=subjects - Force show subjects step (for editing)
  */
 
-export default async function OnboardingPage() {
+interface PageProps {
+  searchParams: Promise<{ edit?: string }>;
+}
+
+export default async function OnboardingPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const editMode = params.edit;
   const supabase = await createClient();
 
   const {
@@ -60,9 +69,8 @@ export default async function OnboardingPage() {
   const hasSubjects = currentSubjects.length > 0;
   const hasLearningStyle = !!result;
 
-  // If learning style is complete, redirect to dashboard
-  // (learning style is the final step, so if done, onboarding is complete)
-  if (hasLearningStyle) {
+  // If learning style is complete and not in edit mode, redirect to dashboard
+  if (hasLearningStyle && !editMode) {
     redirect("/dashboard");
   }
 
@@ -74,6 +82,7 @@ export default async function OnboardingPage() {
         hasLearningStyle={hasLearningStyle}
         currentSubjects={currentSubjects}
         hasChildName={hasChildName}
+        editMode={editMode}
       />
     </div>
   );
