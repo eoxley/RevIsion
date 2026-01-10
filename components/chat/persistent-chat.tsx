@@ -75,6 +75,10 @@ export function PersistentChat({
   const [isInitializing, setIsInitializing] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
+  // Revision mode state (when subject is selected)
+  const [revisionAction, setRevisionAction] = useState<string | null>(null);
+  const [revisionPhase, setRevisionPhase] = useState<string | null>(null);
+
   // Voice input state
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -606,6 +610,7 @@ What do you need help with?`;
     setIsLoading(true);
 
     try {
+      // Save user message
       await fetch(`/api/sessions/${session.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -616,34 +621,63 @@ What do you need help with?`;
         }),
       });
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMsg].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          learningProfile: learningProfile
-            ? {
-                visual: learningProfile.visual,
-                auditory: learningProfile.auditory,
-                readWrite: learningProfile.readWrite,
-                kinesthetic: learningProfile.kinesthetic,
-                primaryStyles: learningProfile.primaryStyles,
-                isMultimodal: learningProfile.isMultimodal,
-              }
-            : null,
-          selectedSubjects: subjects,
-          currentSubject: subjectContext
-            ? {
-                code: subjectContext.subjectCode,
-                name: subjectContext.subjectName,
-                nextTopic: subjectContext.nextTopic,
-              }
-            : null,
-        }),
-      });
+      // Use REVISION API when subject is selected (controlled mode)
+      // Use CHAT API for freeform chat (general questions)
+      const isRevisionMode = !!subjectContext;
+
+      let response: Response;
+
+      if (isRevisionMode) {
+        // Controlled revision with RSC
+        response = await fetch("/api/revision", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: userMessage,
+            session_id: session.id,
+            topic_name: subjectContext.nextTopic || subjectContext.subjectName,
+            subject_code: subjectContext.subjectCode,
+            subject_name: subjectContext.subjectName,
+            learning_style: learningProfile,
+            message_history: messages.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+          }),
+        });
+
+        // Track revision state from headers
+        if (response.headers.get("X-Action")) {
+          setRevisionAction(response.headers.get("X-Action"));
+        }
+        if (response.headers.get("X-Phase")) {
+          setRevisionPhase(response.headers.get("X-Phase"));
+        }
+      } else {
+        // Freeform chat
+        response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [...messages, userMsg].map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            learningProfile: learningProfile
+              ? {
+                  visual: learningProfile.visual,
+                  auditory: learningProfile.auditory,
+                  readWrite: learningProfile.readWrite,
+                  kinesthetic: learningProfile.kinesthetic,
+                  primaryStyles: learningProfile.primaryStyles,
+                  isMultimodal: learningProfile.isMultimodal,
+                }
+              : null,
+            selectedSubjects: subjects,
+            currentSubject: null,
+          }),
+        });
+      }
 
       if (!response.ok) throw new Error("Failed to get response");
 
@@ -676,7 +710,7 @@ What do you need help with?`;
         body: JSON.stringify({
           role: "assistant",
           content: assistantMessage,
-          interaction_type: "explanation",
+          interaction_type: isRevisionMode ? "revision" : "explanation",
         }),
       });
 
@@ -814,7 +848,9 @@ What do you need help with?`;
               </h3>
               <p className="text-sm text-revision-green-600">
                 {subjectContext
-                  ? "Let's continue where you left off"
+                  ? revisionPhase
+                    ? `Revision mode: ${revisionPhase.replace("_", " ")}`
+                    : "Active revision session"
                   : learningProfile
                     ? `Tailored to how you learn`
                     : "Your AI Study Buddy"}
