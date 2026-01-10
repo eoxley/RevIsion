@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     .single();
 
   // Fetch student's enrolled subjects
-  const { data: studentSubjects } = await supabase
+  const { data: studentSubjects, error: subjectsError } = await supabase
     .from("student_subjects")
     .select(
       `
@@ -71,6 +71,12 @@ export default async function DashboardPage() {
     )
     .eq("student_id", user.id)
     .order("priority_level", { ascending: true });
+
+  // Log for debugging
+  if (subjectsError) {
+    console.error("Error fetching student subjects:", subjectsError);
+  }
+  console.log("Student subjects query result:", { count: studentSubjects?.length, data: studentSubjects });
 
   // Only redirect to onboarding if truly not started (no learning style AND no subjects)
   const hasLearningStyle = !!latestResult;

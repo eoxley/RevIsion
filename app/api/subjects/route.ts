@@ -54,17 +54,32 @@ export async function POST(request: Request) {
       );
     }
 
+    // Map UI codes to database codes
+    const dbCodes = subjects.map(s => SUBJECT_CODE_MAP[s] || s);
+    console.log("Subject codes received:", subjects);
+    console.log("Mapped to DB codes:", dbCodes);
+
     // First, get subject IDs from the subjects table
     const { data: subjectRows, error: fetchError } = await supabase
       .from("subjects")
       .select("id, code")
-      .in("code", subjects.map(s => SUBJECT_CODE_MAP[s] || s));
+      .in("code", dbCodes);
+
+    console.log("Subjects found in DB:", subjectRows);
 
     if (fetchError) {
       console.error("Error fetching subjects:", fetchError);
       return NextResponse.json(
         { error: "Failed to fetch subjects" },
         { status: 500 }
+      );
+    }
+
+    if (!subjectRows || subjectRows.length === 0) {
+      console.error("No matching subjects found for codes:", dbCodes);
+      return NextResponse.json(
+        { error: "No matching subjects found", codes: dbCodes },
+        { status: 400 }
       );
     }
 
