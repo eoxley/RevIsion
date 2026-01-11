@@ -53,12 +53,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .order("last_practiced_at", { ascending: false })
       .limit(5);
 
-    // Get revision plan
+    // Get revision plan (one plan per student)
     const { data: revisionPlan } = await supabase
       .from("revision_plans")
       .select("*")
       .eq("student_id", user.id)
-      .eq("subject_code", code)
       .single();
 
     // Build resume message

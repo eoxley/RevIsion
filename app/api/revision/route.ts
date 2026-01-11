@@ -179,6 +179,9 @@ export async function POST(req: NextRequest) {
         // Confirm curriculum position - allow revision to begin
         updatedState = confirmCurriculumPosition(updatedState);
         isDiagnosticMode = false; // No longer in diagnostic mode
+
+        // PHASE 2: Write revision_plans when diagnostic completes
+        await upsertRevisionPlan(supabase, user.id, subject_id || null);
       }
     }
 
@@ -636,4 +639,91 @@ async function loadCompletionData(
     revision_progress: revisionProgress,
     evaluation_summary: Array.from(topicSummaries.values()),
   };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHASE 2: REVISION PLANS WRITE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Calculate days until GCSE exams (May 11, 2026)
+ */
+function calculateDaysUntilExams(): number {
+  const gcseStart = new Date("2026-05-11");
+  const today = new Date();
+  const diffTime = gcseStart.getTime() - today.getTime();
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+}
+
+/**
+ * Determine revision phase based on days remaining
+ */
+function determineRevisionPhase(daysLeft: number): string {
+  if (daysLeft <= 14) return "crisis";
+  if (daysLeft <= 35) return "intensive";
+  if (daysLeft <= 90) return "structured";
+  return "early_preparation";
+}
+
+/**
+ * Upsert revision plan for student
+ *
+ * Called when curriculum diagnostic completes.
+ * Creates plan if not exists, or adds subject to existing plan.
+ */
+async function upsertRevisionPlan(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  studentId: string,
+  subjectId: string | null
+): Promise<void> {
+  try {
+    const daysUntilExams = calculateDaysUntilExams();
+    const currentPhase = determineRevisionPhase(daysUntilExams);
+
+    // Check if plan exists
+    const { data: existingPlan } = await supabase
+      .from("revision_plans")
+      .select("id, subject_ids")
+      .eq("student_id", studentId)
+      .single();
+
+    if (existingPlan) {
+      // Add subject to existing plan if not already present
+      const currentSubjects: string[] = existingPlan.subject_ids || [];
+      if (subjectId && !currentSubjects.includes(subjectId)) {
+        const updatedSubjects = [...currentSubjects, subjectId];
+        await supabase
+          .from("revision_plans")
+          .update({
+            subject_ids: updatedSubjects,
+            days_until_exams: daysUntilExams,
+            current_phase: currentPhase,
+            last_updated_at: new Date().toISOString(),
+          })
+          .eq("id", existingPlan.id);
+      } else {
+        // Just update days and phase
+        await supabase
+          .from("revision_plans")
+          .update({
+            days_until_exams: daysUntilExams,
+            current_phase: currentPhase,
+            last_updated_at: new Date().toISOString(),
+          })
+          .eq("id", existingPlan.id);
+      }
+    } else {
+      // Create new plan
+      await supabase.from("revision_plans").insert({
+        student_id: studentId,
+        subject_ids: subjectId ? [subjectId] : [],
+        days_until_exams: daysUntilExams,
+        current_phase: currentPhase,
+        status: "active",
+      });
+    }
+  } catch (error) {
+    // Non-critical - log but don't fail the request
+    console.error("Error upserting revision plan:", error);
+  }
 }

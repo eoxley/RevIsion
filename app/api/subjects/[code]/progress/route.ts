@@ -53,12 +53,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .eq("subject_code", code)
       .order("updated_at", { ascending: false });
 
-    // Get revision plan
+    // Get revision plan (one plan per student, contains subject_ids array)
     const { data: revisionPlan } = await supabase
       .from("revision_plans")
       .select("*")
       .eq("student_id", user.id)
-      .eq("subject_code", code)
       .single();
 
     // Get session continuity (where they left off)
