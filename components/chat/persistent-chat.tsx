@@ -815,7 +815,7 @@ What do you need help with?`;
   }
 
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm">
+    <div className="flex flex-col h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm" data-testid="chat-container">
       {/* Hidden file input */}
       <input
         type="file"
@@ -846,7 +846,7 @@ What do you need help with?`;
               <h3 className="font-semibold text-neutral-900">
                 {subjectContext ? subjectContext.subjectName : "myrevisionary Coach"}
               </h3>
-              <p className="text-sm text-turquoise-600">
+              <p className="text-sm text-turquoise-600" data-testid="session-phase" data-phase={revisionPhase || "none"}>
                 {subjectContext
                   ? revisionPhase
                     ? `Revision mode: ${revisionPhase.replace("_", " ")}`
@@ -878,7 +878,7 @@ What do you need help with?`;
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50" data-testid="messages-container">
         {messages.map((message, index) => (
           <div
             key={index}
@@ -886,6 +886,8 @@ What do you need help with?`;
               "flex",
               message.role === "user" ? "justify-end" : "justify-start"
             )}
+            data-testid={`chat-message-${message.role}`}
+            data-message-index={index}
           >
             <div
               className={cn(
@@ -949,7 +951,7 @@ What do you need help with?`;
         {/* Loading indicators */}
         {(isLoading || isProcessingImage) &&
           messages[messages.length - 1]?.role === "user" && (
-            <div className="flex justify-start">
+            <div className="flex justify-start" data-testid="loading-indicator">
               <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 border border-neutral-200 shadow-sm">
                 <div className="flex items-center gap-2">
                   {isProcessingImage ? (
@@ -1067,6 +1069,7 @@ What do you need help with?`;
             }
             className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
             disabled={isLoading || isRecording || isTranscribing || isProcessingImage}
+            data-testid="chat-input"
           />
 
           {/* Send Button */}
@@ -1081,6 +1084,7 @@ What do you need help with?`;
               !session
             }
             className="bg-turquoise-500 hover:bg-turquoise-600 text-white"
+            data-testid="send-button"
           >
             Send
           </Button>
