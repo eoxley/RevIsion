@@ -20,7 +20,7 @@ import type {
   Evaluation,
 } from "./types";
 
-import { evaluateAnswer, isHelpRequest, isSkipRequest } from "./evaluator";
+import { evaluateAnswer, isHelpRequest, isSkipRequest, isIdkResponse } from "./evaluator";
 import {
   updateStateFromEvaluation,
   updateStateWithAction,
@@ -69,6 +69,10 @@ export async function processRevisionTurn(
   // This happens BEFORE response generation.
   // No evaluation = no meaningful response.
 
+  // Track special request types for action override
+  let isSkip = false;
+  let needsScaffolding = false;
+
   // Check for meta-requests first
   if (isHelpRequest(student_message)) {
     evaluation = {
@@ -76,12 +80,22 @@ export async function processRevisionTurn(
       confidence: "high",
       error_type: null,
     };
+    needsScaffolding = true;
   } else if (isSkipRequest(student_message)) {
     evaluation = {
       evaluation: "unknown",
       confidence: "high",
       error_type: null,
     };
+    isSkip = true;
+  } else if (isIdkResponse(student_message)) {
+    // IDK responses need scaffolding, NOT "incorrect" treatment
+    evaluation = {
+      evaluation: "unknown",
+      confidence: "low",
+      error_type: "recall_gap",
+    };
+    needsScaffolding = true;
   } else if (currentState.current_question) {
     // Only evaluate if there's a question to evaluate against
     evaluation = await evaluateAnswer({
@@ -106,7 +120,22 @@ export async function processRevisionTurn(
   // ═══════════════════════════════════════════════════════════
   // This is the heart of the controller.
 
-  const decision = determineNextAction(currentState, evaluation);
+  let decision = determineNextAction(currentState, evaluation);
+
+  // Override action for special cases
+  if (isSkip) {
+    // Student requested to skip - move to a new question
+    decision = {
+      action: "INITIAL_QUESTION",
+      phase: "knowledge_ingestion",
+    };
+  } else if (needsScaffolding) {
+    // Student said "I don't know" or asked for help - provide scaffolding
+    decision = {
+      action: "REPHRASE_SIMPLER",
+      phase: "active_revision",
+    };
+  }
 
   // ═══════════════════════════════════════════════════════════
   // STEP 4: UPDATE AGENT PHASE

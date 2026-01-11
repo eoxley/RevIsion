@@ -359,7 +359,35 @@ export function isSkipRequest(message: string): boolean {
     /let'?s (skip|move on)/,
     /i want to (skip|move on)/,
     /different (question|topic)/,
+    /try (something|another|a different)/,
+    /can we try something else/,
   ];
 
   return skipPatterns.some((pattern) => pattern.test(lowerMessage));
+}
+
+/**
+ * Check if message is an "I don't know" type response that needs scaffolding
+ * Exported for use in controller
+ */
+export function isIdkResponse(message: string): boolean {
+  const lowerMessage = message.toLowerCase().trim();
+
+  const idkPatterns = [
+    /^i\s*(don'?t|do not)\s*know/,
+    /^idk$/,
+    /^no\s*idea/,
+    /^not\s*sure/,
+    /^i('m| am)\s*not\s*sure/,
+    /^i\s*(have\s*)?no\s*(idea|clue)/,
+    /^(i\s*)?(can'?t|cannot)\s*(remember|recall)/,
+    /^i\s*(forgot|forget)/,
+    /i\s*don'?t\s*know\s*(this|that|how|what)/,
+    /no\s*idea\s*(what|how|where)/,
+    /don'?t\s*understand/,
+    /^pass$/,
+    /^\?+$/, // Just question marks
+  ];
+
+  return idkPatterns.some((pattern) => pattern.test(lowerMessage));
 }
