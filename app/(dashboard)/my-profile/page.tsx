@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LearningTools } from "@/components/profile/learning-tools";
 import { FullLearningProfile } from "@/components/profile/full-learning-profile";
+import { LearningInsights } from "@/components/profile/learning-insights";
 import { generateLearningProfile } from "@/lib/learning-profile";
 
 export default async function MyProfilePage() {
@@ -155,6 +156,9 @@ export default async function MyProfilePage() {
           </Card>
         ))}
       </div>
+
+      {/* Learning Insights - evaluation_log display */}
+      <LearningInsights />
 
       {/* Learning Tools Component */}
       <LearningTools varkProfile={varkProfile} />
