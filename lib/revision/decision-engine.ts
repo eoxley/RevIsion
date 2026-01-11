@@ -19,6 +19,11 @@ interface DecisionResult {
   phase: AgentPhase;
 }
 
+interface CompletionTrigger {
+  allTopicsSecure: boolean;
+  userRequestedCompletion: boolean;
+}
+
 /**
  * Determine the next action based on current state and evaluation
  *
@@ -27,11 +32,32 @@ interface DecisionResult {
  * CRITICAL INVARIANT:
  * No session may enter knowledge_ingestion, active_revision, recall_check,
  * or misconception_repair until curriculum_position_confirmed === true.
+ *
+ * COMPLETION TRIGGER:
+ * If all topics are secure OR user explicitly requests completion,
+ * transition to completion_review phase.
  */
 export function determineNextAction(
   state: RevisionSessionState,
-  evaluation: Evaluation | null
+  evaluation: Evaluation | null,
+  completionTrigger?: CompletionTrigger
 ): DecisionResult {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // COMPLETION REVIEW GATE
+  // If all topics secure OR user requested completion, run completion agent
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  if (
+    state.phase !== "completion_review" &&
+    state.phase !== "session_close" &&
+    completionTrigger &&
+    shouldTriggerCompletion(completionTrigger.allTopicsSecure, completionTrigger.userRequestedCompletion)
+  ) {
+    return {
+      action: "RUN_COMPLETION_REVIEW",
+      phase: "completion_review",
+    };
+  }
   // ═══════════════════════════════════════════════════════════════════════════
   // CURRICULUM DIAGNOSTIC GATE (MANDATORY)
   // Subject selection ≠ ready to revise
@@ -257,6 +283,9 @@ export function getPhaseForAction(
     case "RECOVER_CONFIDENCE":
       return "panic_recovery";
 
+    case "RUN_COMPLETION_REVIEW":
+      return "completion_review";
+
     case "AWAIT_RESPONSE":
       return currentPhase;
 
@@ -275,10 +304,10 @@ export function isActionAllowedInPhase(
   phase: AgentPhase
 ): boolean {
   const allowedActions: Record<AgentPhase, ActionType[]> = {
-    greeting: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION"],
-    topic_selection: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION"],
-    curriculum_diagnostic: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION", "AWAIT_RESPONSE"],
-    knowledge_ingestion: ["INITIAL_QUESTION", "AWAIT_RESPONSE"],
+    greeting: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION", "RUN_COMPLETION_REVIEW"],
+    topic_selection: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION", "RUN_COMPLETION_REVIEW"],
+    curriculum_diagnostic: ["DIAGNOSTIC_QUESTION", "INITIAL_QUESTION", "AWAIT_RESPONSE", "RUN_COMPLETION_REVIEW"],
+    knowledge_ingestion: ["INITIAL_QUESTION", "AWAIT_RESPONSE", "RUN_COMPLETION_REVIEW"],
     active_revision: [
       "EXTEND_DIFFICULTY",
       "RETRY_WITH_HINT",
@@ -286,10 +315,12 @@ export function isActionAllowedInPhase(
       "CONFIRM_MASTERY",
       "RECOVER_CONFIDENCE",
       "AWAIT_RESPONSE",
+      "RUN_COMPLETION_REVIEW",
     ],
-    recall_check: ["CONFIRM_MASTERY", "ADVANCE_TOPIC", "AWAIT_RESPONSE"],
-    misconception_repair: ["REPHRASE_SIMPLER", "RETRY_WITH_HINT", "AWAIT_RESPONSE"],
-    panic_recovery: ["RECOVER_CONFIDENCE", "REPHRASE_SIMPLER", "AWAIT_RESPONSE"],
+    recall_check: ["CONFIRM_MASTERY", "ADVANCE_TOPIC", "AWAIT_RESPONSE", "RUN_COMPLETION_REVIEW"],
+    misconception_repair: ["REPHRASE_SIMPLER", "RETRY_WITH_HINT", "AWAIT_RESPONSE", "RUN_COMPLETION_REVIEW"],
+    panic_recovery: ["RECOVER_CONFIDENCE", "REPHRASE_SIMPLER", "AWAIT_RESPONSE", "RUN_COMPLETION_REVIEW"],
+    completion_review: ["RUN_COMPLETION_REVIEW"],
     session_close: [],
   };
 
@@ -306,4 +337,20 @@ export function shouldAdvanceTopic(state: RevisionSessionState): boolean {
     state.correct_streak >= 2 &&
     state.last_evaluation === "correct"
   );
+}
+
+/**
+ * Determine if completion review should trigger
+ *
+ * HARD TRIGGERS (non-negotiable):
+ * 1. allTopicsSecure === true (automatic)
+ * 2. userRequestedCompletion === true (explicit "FINISH_AND_TEST_ME")
+ *
+ * If neither condition is met, continue revision.
+ */
+export function shouldTriggerCompletion(
+  allTopicsSecure: boolean,
+  userRequestedCompletion: boolean
+): boolean {
+  return allTopicsSecure || userRequestedCompletion;
 }

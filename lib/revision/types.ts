@@ -18,7 +18,8 @@ export type ActionType =
   | "ADVANCE_TOPIC"
   | "RECOVER_CONFIDENCE"
   | "INITIAL_QUESTION"
-  | "AWAIT_RESPONSE";
+  | "AWAIT_RESPONSE"
+  | "RUN_COMPLETION_REVIEW";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // AGENT PHASES
@@ -33,6 +34,7 @@ export type AgentPhase =
   | "recall_check"
   | "misconception_repair"
   | "panic_recovery"
+  | "completion_review"
   | "session_close";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -154,4 +156,46 @@ export interface RevisionProgress {
 
   created_at?: string;
   last_interaction_at?: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPLETION AGENT TYPES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface EvaluationSummary {
+  topic_id: string;
+  topic_name: string;
+  total_attempts: number;
+  correct_count: number;
+  error_types: ErrorType[];
+}
+
+export interface CompletionInput {
+  student_id: string;
+  session_id: string;
+  subject_id: string;
+  subject_name: string;
+  exam_board?: string;
+  completed_topics: string[];
+  revision_progress: RevisionProgress[];
+  evaluation_summary: EvaluationSummary[];
+}
+
+export interface MockQuestion {
+  question: string;
+  marks: number;
+  command_word: string;
+  topic: string;
+}
+
+export type ReadinessSignal =
+  | "Ready to progress"
+  | "One more practice round recommended"
+  | "Specific topic review recommended";
+
+export interface CompletionOutput {
+  knowledge_summary: string[];
+  exam_mapping: string;
+  mock_questions: MockQuestion[];
+  readiness_signal: ReadinessSignal;
 }

@@ -194,3 +194,34 @@ export function isDiagnosticComplete(state: RevisionSessionState): boolean {
   // Complete after 3 diagnostic questions minimum
   return state.diagnostic_questions_asked >= 3;
 }
+
+/**
+ * Transition to completion review phase
+ *
+ * This is triggered when:
+ * 1. All topics in module are secure, OR
+ * 2. User explicitly requests completion ("FINISH_AND_TEST_ME")
+ */
+export function transitionToCompletionReview(
+  state: RevisionSessionState
+): RevisionSessionState {
+  return {
+    ...state,
+    phase: "completion_review",
+    last_action: "RUN_COMPLETION_REVIEW",
+  };
+}
+
+/**
+ * Transition to session close after completion review
+ *
+ * Final phase - session is complete.
+ */
+export function transitionToSessionClose(
+  state: RevisionSessionState
+): RevisionSessionState {
+  return {
+    ...state,
+    phase: "session_close",
+  };
+}

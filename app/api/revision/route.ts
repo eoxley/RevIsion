@@ -25,6 +25,9 @@ import {
   requiresDiagnostic,
   isDiagnosticComplete,
   getNextDiagnosticQuestion,
+  transitionToSessionClose,
+  runCompletionAgent,
+  isCompletionRequest,
   type RevisionSessionState,
   type LearningStyle,
   type ActionType,
@@ -32,6 +35,9 @@ import {
   type UnderstandingState,
   type DeliveryTechnique,
   type EvaluationResult,
+  type CompletionInput,
+  type EvaluationSummary,
+  type ErrorType,
 } from "@/lib/revision";
 
 interface RequestBody {
@@ -88,6 +94,39 @@ export async function POST(req: NextRequest) {
         topic_name || null
       );
       await saveSessionState(supabase, sessionState);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // COMPLETION REVIEW GATE
+    // Check if completion should trigger (all topics secure OR user request)
+    // ═══════════════════════════════════════════════════════════
+
+    const allTopicsSecure = await checkAllTopicsSecure(supabase, user.id, session_id);
+    const userRequestedCompletion = isCompletionRequest(message);
+
+    if (allTopicsSecure || userRequestedCompletion) {
+      // Load data for completion agent
+      const completionInput = await loadCompletionData(
+        supabase,
+        user.id,
+        session_id,
+        subject_id || "",
+        subject_name || "GCSE Subject"
+      );
+
+      // Run completion agent (READ-ONLY)
+      const completionOutput = await runCompletionAgent(completionInput);
+
+      // Update state to session_close
+      const closedState = transitionToSessionClose(sessionState);
+      await saveSessionState(supabase, closedState);
+
+      // Return completion response (not streamed - structured JSON)
+      return NextResponse.json({
+        type: "completion_review",
+        phase: "completion_review",
+        ...completionOutput,
+      });
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -470,4 +509,131 @@ async function updateRevisionProgress(
       console.error("Failed to create revision progress:", error);
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPLETION REVIEW HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Check if all topics in the session have understanding_state = "secure"
+ *
+ * This is one of the HARD TRIGGERS for completion review.
+ */
+async function checkAllTopicsSecure(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  studentId: string,
+  sessionId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("revision_progress")
+    .select("understanding_state")
+    .eq("student_id", studentId)
+    .eq("session_id", sessionId);
+
+  if (error || !data || data.length === 0) {
+    return false;
+  }
+
+  // All topics must be "secure"
+  return data.every((row) => row.understanding_state === "secure");
+}
+
+/**
+ * Load all data needed for the Completion Agent
+ *
+ * This function is READ-ONLY. It only queries data, never modifies it.
+ */
+async function loadCompletionData(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  studentId: string,
+  sessionId: string,
+  subjectId: string,
+  subjectName: string
+): Promise<CompletionInput> {
+  // Load revision progress
+  const { data: progressData } = await supabase
+    .from("revision_progress")
+    .select("*")
+    .eq("student_id", studentId)
+    .eq("session_id", sessionId);
+
+  const revisionProgress: RevisionProgress[] = (progressData || []).map((row) => ({
+    id: row.id,
+    student_id: row.student_id,
+    session_id: row.session_id,
+    subject_id: row.subject_id,
+    topic_id: row.topic_id,
+    attempts: row.attempts,
+    correct_count: row.correct_count,
+    incorrect_count: row.incorrect_count,
+    partial_count: row.partial_count,
+    last_evaluation: row.last_evaluation,
+    understanding_state: row.understanding_state,
+    delivery_modes_used: row.delivery_modes_used || [],
+    created_at: row.created_at,
+    last_interaction_at: row.last_interaction_at,
+  }));
+
+  // Load evaluation log to summarize error trends
+  const { data: evalLogData } = await supabase
+    .from("evaluation_log")
+    .select("*")
+    .eq("session_id", sessionId);
+
+  // Build evaluation summaries per topic
+  const topicSummaries = new Map<string, EvaluationSummary>();
+
+  (evalLogData || []).forEach((entry) => {
+    const topicId = entry.topic_id || "unknown";
+    const topicName = entry.topic_name || "Unknown Topic";
+
+    if (!topicSummaries.has(topicId)) {
+      topicSummaries.set(topicId, {
+        topic_id: topicId,
+        topic_name: topicName,
+        total_attempts: 0,
+        correct_count: 0,
+        error_types: [],
+      });
+    }
+
+    const summary = topicSummaries.get(topicId)!;
+    summary.total_attempts += 1;
+
+    if (entry.evaluation === "correct") {
+      summary.correct_count += 1;
+    }
+
+    if (entry.error_type) {
+      summary.error_types.push(entry.error_type as ErrorType);
+    }
+  });
+
+  // Extract completed topic names
+  const completedTopics: string[] = [];
+  topicSummaries.forEach((summary) => {
+    if (summary.topic_name !== "Unknown Topic") {
+      completedTopics.push(summary.topic_name);
+    }
+  });
+
+  // If no topics found from eval log, try to extract from progress
+  if (completedTopics.length === 0) {
+    revisionProgress.forEach((p) => {
+      if (p.topic_id) {
+        completedTopics.push(p.topic_id);
+      }
+    });
+  }
+
+  return {
+    student_id: studentId,
+    session_id: sessionId,
+    subject_id: subjectId,
+    subject_name: subjectName,
+    completed_topics: completedTopics,
+    revision_progress: revisionProgress,
+    evaluation_summary: Array.from(topicSummaries.values()),
+  };
 }

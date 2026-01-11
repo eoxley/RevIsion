@@ -31,6 +31,8 @@ export {
   confirmCurriculumPosition,
   requiresDiagnostic,
   isDiagnosticComplete,
+  transitionToCompletionReview,
+  transitionToSessionClose,
 } from "./state";
 
 export {
@@ -44,6 +46,7 @@ export {
   getPhaseForAction,
   isActionAllowedInPhase,
   shouldAdvanceTopic,
+  shouldTriggerCompletion,
 } from "./decision-engine";
 
 export {
@@ -55,6 +58,12 @@ export {
   runCombinedAgent,
   responseHasQuestion,
 } from "./combined-agent";
+
+export {
+  runCompletionAgent,
+  generateMockQuestions,
+  isCompletionRequest,
+} from "./completion-agent";
 
 export {
   getAllowedTechniques,
@@ -79,6 +88,11 @@ export type {
   TopicContext,
   RevisionProgress,
   UnderstandingState,
+  CompletionInput,
+  CompletionOutput,
+  MockQuestion,
+  EvaluationSummary,
+  ReadinessSignal,
 } from "./types";
 
 export type {
