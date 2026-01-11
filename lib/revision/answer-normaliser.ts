@@ -126,8 +126,9 @@ export function normaliseToSet(answer: string): Set<string> {
  */
 function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
   if (a.size !== b.size) return false;
-  for (const item of a) {
-    if (!b.has(item)) return false;
+  const aArray = Array.from(a);
+  for (let i = 0; i < aArray.length; i++) {
+    if (!b.has(aArray[i])) return false;
   }
   return true;
 }
@@ -137,9 +138,10 @@ function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
  */
 function setIntersection<T>(a: Set<T>, b: Set<T>): Set<T> {
   const result = new Set<T>();
-  for (const item of a) {
-    if (b.has(item)) {
-      result.add(item);
+  const aArray = Array.from(a);
+  for (let i = 0; i < aArray.length; i++) {
+    if (b.has(aArray[i])) {
+      result.add(aArray[i]);
     }
   }
   return result;
