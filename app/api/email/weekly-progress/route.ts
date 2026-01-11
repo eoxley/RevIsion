@@ -87,37 +87,50 @@ async function sendWeeklyProgressForStudent(studentId: string, parentEmail?: str
     `)
     .eq('student_id', studentId);
 
-  // Get topic understanding changes this week
-  const { data: understandingChanges } = await supabase
-    .from('understanding_state_history')
-    .select(`
-      *,
-      topics (name, subject_id, subjects (name))
-    `)
-    .eq('student_id', studentId)
-    .gte('changed_at', weekStart.toISOString());
-
-  // Get current topic understanding
-  const { data: topicUnderstanding } = await supabase
-    .from('student_topic_understanding')
-    .select(`
-      *,
-      topics (name, subject_id)
-    `)
+  // Get revision progress (PHASE 4 FIX: use populated table instead of dead ones)
+  const { data: revisionProgress } = await supabase
+    .from('revision_progress')
+    .select('*')
     .eq('student_id', studentId);
 
-  // Get engagement record for the week
-  const { data: engagementRecord } = await supabase
-    .from('engagement_weekly_records')
+  // Get topic progress (also populated)
+  const { data: topicProgress } = await supabase
+    .from('topic_progress')
     .select('*')
+    .eq('student_id', studentId);
+
+  // Calculate engagement metrics from sessions (instead of engagement_weekly_records)
+  const uniqueDays = new Set(sessions?.map(s => new Date(s.started_at).toDateString()));
+  const daysActiveCount = uniqueDays.size;
+  const avgSessionLength = sessions?.length
+    ? Math.round(sessions.reduce((sum, s) => sum + (s.duration_minutes || 15), 0) / sessions.length)
+    : 0;
+
+  // Calculate momentum from recent sessions (last 2 weeks comparison)
+  const twoWeeksAgo = new Date(weekStart);
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 7);
+  const { data: previousWeekSessions } = await supabase
+    .from('learning_sessions')
+    .select('id')
     .eq('student_id', studentId)
-    .eq('week_start_date', weekStart.toISOString().split('T')[0])
-    .single();
+    .gte('started_at', twoWeeksAgo.toISOString())
+    .lt('started_at', weekStart.toISOString());
+
+  const currentWeekCount = sessions?.length || 0;
+  const previousWeekCount = previousWeekSessions?.length || 0;
+  const momentumTrendCalculated = currentWeekCount > previousWeekCount
+    ? 'improving'
+    : currentWeekCount < previousWeekCount
+    ? 'declining'
+    : 'stable';
+  const momentumScoreCalculated = Math.min(100, Math.round(
+    (daysActiveCount / 7) * 50 + (currentWeekCount / 5) * 50
+  ));
 
   // Calculate metrics
   const totalSessions = sessions?.length || 0;
-  const totalMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
-  const daysActive = new Set(sessions?.map(s => new Date(s.started_at).toDateString())).size;
+  const totalMinutes = sessions?.reduce((sum, s) => sum + (s.duration_minutes || 15), 0) || 0;
+  const daysActive = daysActiveCount;
 
   const isInactive = totalSessions === 0;
   let inactivityDays = 0;
@@ -139,34 +152,33 @@ async function sendWeeklyProgressForStudent(studentId: string, parentEmail?: str
     }
   }
 
-  // Process topic improvements
-  const topicsImproved = understandingChanges?.filter(
-    c => getStateLevel(c.to_state) > getStateLevel(c.from_state)
-  ).length || 0;
+  // Process topic improvements (PHASE 4 FIX: use revision_progress)
+  const secureTopics = revisionProgress?.filter(p => p.understanding_state === 'secure') || [];
+  const strengtheningTopics = revisionProgress?.filter(p => p.understanding_state === 'strengthening') || [];
+  const buildingTopics = revisionProgress?.filter(p => p.understanding_state === 'building') || [];
 
-  const topicsSecured = understandingChanges?.filter(
-    c => c.to_state === 'secure'
-  ).length || 0;
+  const topicsSecured = secureTopics.length;
+  const topicsImproved = secureTopics.length + strengtheningTopics.length;
 
-  // Get top progress topics
-  const topProgressTopics = understandingChanges
-    ?.filter(c => getStateLevel(c.to_state) > getStateLevel(c.from_state))
+  // Get top progress topics from revision_progress
+  const topProgressTopics = secureTopics
     .slice(0, 3)
-    .map(c => ({
-      name: c.topics?.name || 'Unknown Topic',
-      subject: c.topics?.subjects?.name || 'Unknown Subject',
-      previousState: c.from_state || 'not_understood',
-      currentState: c.to_state,
-    })) || [];
+    .map(p => ({
+      name: p.topic_id || 'Topic',
+      subject: 'Subject', // Would need to join with subjects table
+      previousState: 'building',
+      currentState: 'secure',
+    }));
 
-  // Build subject summaries
+  // Build subject summaries from topic_progress
   const subjectSummaries = studentSubjects?.map(ss => {
-    const subjectTopics = topicUnderstanding?.filter(
-      tu => tu.topics?.subject_id === ss.subject_id
-    ) || [];
-    const secure = subjectTopics.filter(t => t.understanding_state === 'secure').length;
-    const total = subjectTopics.length || 1;
-    const subjectSessions = sessions?.filter(s => s.primary_subject_id === ss.subject_id) || [];
+    const subjectCode = ss.subjects?.code || '';
+    const subjectTopics = topicProgress?.filter(tp => tp.subject_code === subjectCode) || [];
+    const subjectRevision = revisionProgress?.filter(rp => rp.subject_id === ss.subject_id) || [];
+
+    const secure = subjectTopics.filter(t => t.understanding_state === 'secure').length +
+                   subjectRevision.filter(r => r.understanding_state === 'secure').length;
+    const total = Math.max(subjectTopics.length + subjectRevision.length, 1);
 
     return {
       name: ss.subjects?.name || 'Unknown',
@@ -174,16 +186,15 @@ async function sendWeeklyProgressForStudent(studentId: string, parentEmail?: str
       topicsSecure: secure,
       topicsTotal: total,
       percentageComplete: Math.round((secure / total) * 100),
-      sessionsThisWeek: subjectSessions.length,
-      minutesThisWeek: subjectSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0),
+      sessionsThisWeek: 0, // Session data doesn't track subject_id currently
+      minutesThisWeek: 0,
     };
   }) || [];
 
-  // Areas needing attention (not_understood or partially_understood topics)
-  const areasNeedingAttention = topicUnderstanding
-    ?.filter(t => t.understanding_state === 'not_understood' || t.understanding_state === 'partially_understood')
+  // Areas needing attention (building state topics)
+  const areasNeedingAttention = buildingTopics
     .slice(0, 3)
-    .map(t => t.topics?.name || 'Unknown topic') || [];
+    .map(t => t.topic_id || 'Unknown topic');
 
   // Upcoming focus (from plan if exists)
   const upcomingFocus = [
@@ -210,8 +221,8 @@ async function sendWeeklyProgressForStudent(studentId: string, parentEmail?: str
     topicsImproved,
     topicsSecured,
     newMisconceptionsCleared: 0, // Would calculate from misconception_resolution_logs
-    momentumScore: engagementRecord?.momentum_score || 50,
-    momentumTrend: (engagementRecord?.momentum_trend || 'stable') as 'improving' | 'stable' | 'declining',
+    momentumScore: momentumScoreCalculated,
+    momentumTrend: momentumTrendCalculated as 'improving' | 'stable' | 'declining',
     streakDays: 0, // Would calculate from consecutive session days
     subjectSummaries,
     topProgressTopics,
