@@ -20,7 +20,7 @@ import type {
   Evaluation,
 } from "./types";
 
-import { evaluateAnswer, isHelpRequest, isSkipRequest, isIdkResponse } from "./evaluator";
+import { evaluateAnswer } from "./evaluator";
 import {
   updateStateFromEvaluation,
   updateStateWithAction,
@@ -31,6 +31,12 @@ import {
   buildLLMInstructions,
   buildConstrainedSystemPrompt,
 } from "./instruction-builder";
+import {
+  classifyIntent,
+  getIntentGuidance,
+  shouldRecordResult,
+  type StudentIntent,
+} from "./intent-classifier";
 
 /**
  * Main controller function
@@ -64,46 +70,57 @@ export async function processRevisionTurn(
   let evaluation: Evaluation | null = null;
 
   // ═══════════════════════════════════════════════════════════
-  // STEP 1: EVALUATE THE ANSWER
+  // STEP 0: CLASSIFY INTENT (BEFORE VALIDATION)
   // ═══════════════════════════════════════════════════════════
-  // This happens BEFORE response generation.
-  // No evaluation = no meaningful response.
+  // This prevents explanations from being marked as wrong answers.
+  // Intent classification happens FIRST.
 
-  // Track special request types for action override
-  let isSkip = false;
-  let needsScaffolding = false;
+  const intent: StudentIntent = classifyIntent(student_message);
+  const intentGuidance = getIntentGuidance(intent);
 
-  // Check for meta-requests first
-  if (isHelpRequest(student_message)) {
-    evaluation = {
-      evaluation: "unknown",
-      confidence: "high",
-      error_type: null,
-    };
-    needsScaffolding = true;
-  } else if (isSkipRequest(student_message)) {
-    evaluation = {
-      evaluation: "unknown",
-      confidence: "high",
-      error_type: null,
-    };
-    isSkip = true;
-  } else if (isIdkResponse(student_message)) {
-    // IDK responses need scaffolding, NOT "incorrect" treatment
-    evaluation = {
-      evaluation: "unknown",
-      confidence: "low",
-      error_type: "recall_gap",
-    };
-    needsScaffolding = true;
-  } else if (currentState.current_question) {
-    // Only evaluate if there's a question to evaluate against
+  // ═══════════════════════════════════════════════════════════
+  // STEP 1: EVALUATE THE ANSWER (only for solution intent)
+  // ═══════════════════════════════════════════════════════════
+  // Only validate if intent is 'solution' AND there's a question.
+  // Other intents skip validation entirely.
+
+  if (intentGuidance.shouldValidate && currentState.current_question) {
+    // Intent is 'solution' - validate the answer
     evaluation = await evaluateAnswer({
       studentAnswer: student_message,
       currentQuestion: currentState.current_question,
       expectedAnswerHint: currentState.expected_answer_hint,
       topicName: currentState.topic_name,
     });
+  } else {
+    // Non-solution intent - set appropriate evaluation
+    switch (intent) {
+      case 'uncertainty':
+        evaluation = {
+          evaluation: "unknown",
+          confidence: "low",
+          error_type: "recall_gap",
+        };
+        break;
+      case 'explanation':
+        // CRITICAL: Do NOT mark explanations as wrong
+        evaluation = {
+          evaluation: "unknown",
+          confidence: "medium",
+          error_type: null,
+        };
+        break;
+      case 'skip':
+      case 'question':
+      case 'meta':
+      default:
+        evaluation = {
+          evaluation: "unknown",
+          confidence: "high",
+          error_type: null,
+        };
+        break;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -122,19 +139,53 @@ export async function processRevisionTurn(
 
   let decision = determineNextAction(currentState, evaluation);
 
-  // Override action for special cases
-  if (isSkip) {
-    // Student requested to skip - move to a new question
-    decision = {
-      action: "INITIAL_QUESTION",
-      phase: "knowledge_ingestion",
-    };
-  } else if (needsScaffolding) {
-    // Student said "I don't know" or asked for help - provide scaffolding
-    decision = {
-      action: "REPHRASE_SIMPLER",
-      phase: "active_revision",
-    };
+  // Override action based on classified intent
+  switch (intent) {
+    case 'skip':
+      // Student requested to skip - move to a new question
+      decision = {
+        action: "INITIAL_QUESTION",
+        phase: "knowledge_ingestion",
+      };
+      // Reset question state for clean slate
+      currentState = resetQuestionState(currentState);
+      break;
+
+    case 'uncertainty':
+      // Student said "I don't know" - provide scaffolding
+      decision = {
+        action: "REPHRASE_SIMPLER",
+        phase: "active_revision",
+      };
+      break;
+
+    case 'explanation':
+      // Student showed working - acknowledge and request final answer
+      decision = {
+        action: "AWAIT_RESPONSE",
+        phase: currentState.phase,
+      };
+      break;
+
+    case 'question':
+      // Student asked a clarifying question - answer and redirect
+      decision = {
+        action: "AWAIT_RESPONSE",
+        phase: currentState.phase,
+      };
+      break;
+
+    case 'meta':
+      // Off-topic - brief acknowledge and redirect
+      decision = {
+        action: "AWAIT_RESPONSE",
+        phase: currentState.phase,
+      };
+      break;
+
+    case 'solution':
+      // Normal flow - use decision from determineNextAction
+      break;
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -159,6 +210,7 @@ export async function processRevisionTurn(
     learningStyle: learning_style,
     evaluation,
     subjectName: subject_name,
+    studentIntent: intent,
   });
 
   // ═══════════════════════════════════════════════════════════
@@ -175,6 +227,22 @@ export async function processRevisionTurn(
     updated_state: currentState,
     updated_phase: decision.phase,
     evaluation,
+  };
+}
+
+/**
+ * Reset question-specific state when advancing to a new question
+ * This prevents state leakage between questions (CRITICAL)
+ */
+function resetQuestionState(state: RevisionSessionState): RevisionSessionState {
+  return {
+    ...state,
+    // Clear question-specific state
+    current_question: null,
+    expected_answer_hint: null,
+    attempts: 0,
+    // Preserve session-level state
+    // diagnostic_questions_asked, correct_streak, etc. are NOT reset
   };
 }
 

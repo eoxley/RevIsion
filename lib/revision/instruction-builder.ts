@@ -15,6 +15,7 @@ import type {
   RevisionSessionState,
   Evaluation,
 } from "./types";
+import type { StudentIntent } from "./intent-classifier";
 
 interface InstructionParams {
   action: ActionType;
@@ -22,6 +23,7 @@ interface InstructionParams {
   learningStyle: LearningStyle | null;
   evaluation: Evaluation | null;
   subjectName: string | null;
+  studentIntent?: StudentIntent;
 }
 
 /**
@@ -39,12 +41,19 @@ export function buildConstrainedSystemPrompt(
 Your ONLY job is to ask diagnostic questions to assess where the student is in the curriculum.
 
 RULES:
-1. Ask ONLY the question provided
+1. Ask ONLY the question provided - ONE question per response
 2. Do NOT teach, explain, or give hints
 3. Do NOT use revision language like "let's learn" or "I'll help you understand"
 4. Use neutral acknowledgements only: "Thanks", "Okay", "Got it"
 5. Keep responses under 30 words
 6. End with the diagnostic question
+
+ON WRONG ANSWERS:
+- Say "Thanks" or "Got it" ONLY
+- Move to next question immediately
+- Do NOT say "not quite" or reveal the answer
+- Do NOT teach or explain
+- One attempt per question, then move on
 
 ${instructions}`;
   }
@@ -162,18 +171,73 @@ If the student can progress without answering, you have failed.`;
  * Build LLM instructions based on action
  */
 export function buildLLMInstructions(params: InstructionParams): string {
-  const { action, state, learningStyle, evaluation, subjectName } = params;
+  const { action, state, learningStyle, evaluation, subjectName, studentIntent } = params;
 
   const context = buildContext(state, learningStyle, subjectName);
   const actionInstructions = getActionInstructions(action, state, evaluation);
   const styleGuidance = buildStyleGuidance(learningStyle);
+  const intentGuidance = studentIntent ? getIntentInstructions(studentIntent) : '';
 
   return `${context}
 
 ACTION: ${action}
 ${actionInstructions}
+${intentGuidance}
 
 ${styleGuidance}`;
+}
+
+/**
+ * Get intent-specific instructions for the LLM
+ */
+function getIntentInstructions(intent: StudentIntent): string {
+  switch (intent) {
+    case 'explanation':
+      return `
+STUDENT INTENT: The student showed their working/reasoning.
+RESPONSE RULES:
+- ACKNOWLEDGE their reasoning positively ("Good thinking about...")
+- DO NOT mark as wrong or say "not quite"
+- ASK for their final answer: "What answer does that give you?"
+- Keep response short`;
+
+    case 'uncertainty':
+      return `
+STUDENT INTENT: The student said they don't know.
+RESPONSE RULES:
+- DO NOT mark as wrong
+- Provide scaffolding (break down the problem)
+- Give a hint about where to start
+- Ask a simpler lead-in question`;
+
+    case 'question':
+      return `
+STUDENT INTENT: The student asked a clarifying question.
+RESPONSE RULES:
+- Answer their question briefly
+- Then redirect back to the original question
+- Do not give away the answer`;
+
+    case 'skip':
+      return `
+STUDENT INTENT: The student wants to skip this question.
+RESPONSE RULES:
+- Acknowledge briefly: "No problem, let's try another."
+- Move to a new question immediately
+- Do not explain the skipped question`;
+
+    case 'meta':
+      return `
+STUDENT INTENT: Off-topic message (greeting, thanks, etc.)
+RESPONSE RULES:
+- Brief acknowledgment only
+- Redirect to the current question
+- Keep it short`;
+
+    case 'solution':
+    default:
+      return ''; // Normal flow, no special instructions
+  }
 }
 
 /**
