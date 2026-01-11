@@ -95,16 +95,16 @@ export default async function ResultsPage({ params }: PageProps) {
       </div>
 
       {/* Primary Style Banner */}
-      <Card className="bg-gradient-to-r from-revision-green-500 to-revision-green-600 text-white border-0">
+      <Card className="bg-gradient-to-r from-turquoise-500 to-turquoise-600 text-white border-0">
         <CardContent className="py-8 text-center">
-          <p className="text-revision-green-100 text-sm uppercase tracking-wide mb-2">
+          <p className="text-turquoise-100 text-sm uppercase tracking-wide mb-2">
             You're a{result.is_multimodal ? " multi-style" : "n"}{!result.is_multimodal && ` ${result.primary_styles[0]?.replace("_", "/")} `}learner
           </p>
           <h2 className="text-4xl font-bold">
             {result.primary_styles.map(getStyleLabel).join(" + ")}
           </h2>
           {result.is_multimodal && (
-            <p className="text-revision-green-100 mt-2">
+            <p className="text-turquoise-100 mt-2">
               You learn best when you mix up your revision techniques
             </p>
           )}
@@ -213,7 +213,7 @@ export default async function ResultsPage({ params }: PageProps) {
           <Button variant="outline">Start revising</Button>
         </Link>
         <Link href="/assessment">
-          <Button className="bg-revision-green-500 hover:bg-revision-green-600">Retake the quiz</Button>
+          <Button className="bg-turquoise-500 hover:bg-turquoise-600">Retake the quiz</Button>
         </Link>
       </div>
     </div>

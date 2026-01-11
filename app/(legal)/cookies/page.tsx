@@ -223,7 +223,7 @@ export default function CookiePolicy() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-neutral-200">
-          <Link href="/" className="text-revision-green-600 hover:text-revision-green-700 font-medium">
+          <Link href="/" className="text-azure-500 hover:text-azure-600 font-medium">
             &larr; Back to home
           </Link>
         </div>

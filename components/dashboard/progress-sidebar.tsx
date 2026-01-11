@@ -2,7 +2,7 @@
  * Progress Sidebar
  *
  * Shows ONLY schema-backed progress indicators.
- * Brand-compliant: uses green for positive progress, neutral for inactive.
+ * Brand-compliant: Azure Blue #3783a5 for headings, Turquoise #37a87b for progress.
  * NO red, NO gamification.
  *
  * Currently Rendered (backed by database):
@@ -81,7 +81,7 @@ export function ProgressSidebar({
       {/* Learning Style Section */}
       {learningProfile && (
         <div className="p-4 border-b border-neutral-200">
-          <h3 className="text-sm font-medium text-revision-green-600 mb-3">
+          <h3 className="text-sm font-medium text-azure-500 mb-3">
             How you learn
           </h3>
           <div className="space-y-2">
@@ -107,7 +107,7 @@ export function ProgressSidebar({
             />
           </div>
           {learningProfile.isMultimodal && (
-            <p className="text-xs text-revision-green-600 mt-2">
+            <p className="text-xs text-azure-500 mt-2">
               You learn best using multiple styles
             </p>
           )}
@@ -122,12 +122,12 @@ export function ProgressSidebar({
       {/* Subjects Section */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-revision-green-600">
+          <h3 className="text-sm font-medium text-azure-500">
             Your Subjects
           </h3>
           <a
             href="/onboarding?edit=subjects"
-            className="text-xs text-neutral-400 hover:text-revision-green-600"
+            className="text-xs text-neutral-400 hover:text-azure-500"
           >
             Edit
           </a>
@@ -142,10 +142,10 @@ export function ProgressSidebar({
         ) : (
           <a
             href="/onboarding?edit=subjects"
-            className="block text-center py-6 rounded-lg border-2 border-dashed border-neutral-200 hover:border-revision-green-300 transition"
+            className="block text-center py-6 rounded-lg border-2 border-dashed border-neutral-200 hover:border-turquoise-300 transition"
           >
             <p className="text-sm text-neutral-500">No subjects added yet</p>
-            <p className="text-xs text-revision-green-600 mt-1">
+            <p className="text-xs text-azure-500 mt-1">
               Click to add subjects
             </p>
           </a>
@@ -183,7 +183,7 @@ function LearningStyleBar({
         <div
           className={cn(
             "h-full rounded-full transition-all",
-            isPrimary ? "bg-revision-green-500" : "bg-neutral-300"
+            isPrimary ? "bg-turquoise-500" : "bg-neutral-300"
           )}
           style={{ width: `${value}%` }}
         />
@@ -191,7 +191,7 @@ function LearningStyleBar({
       <span
         className={cn(
           "text-xs w-8 text-right",
-          isPrimary ? "text-revision-green-600 font-medium" : "text-neutral-500"
+          isPrimary ? "text-azure-500 font-medium" : "text-neutral-500"
         )}
       >
         {value}%
@@ -205,7 +205,7 @@ const UNDERSTANDING_COLORS: Record<string, { bg: string; text: string; bar: stri
   not_started: { bg: "bg-neutral-100", text: "text-neutral-500", bar: "bg-neutral-300" },
   building: { bg: "bg-amber-50", text: "text-amber-600", bar: "bg-amber-400" },
   strengthening: { bg: "bg-blue-50", text: "text-blue-600", bar: "bg-blue-400" },
-  secure: { bg: "bg-revision-green-50", text: "text-revision-green-600", bar: "bg-revision-green-500" },
+  secure: { bg: "bg-turquoise-50", text: "text-azure-500", bar: "bg-turquoise-500" },
 };
 
 /**
@@ -226,7 +226,7 @@ function SubjectCard({ studentSubject }: { studentSubject: StudentSubject }) {
   const colors = UNDERSTANDING_COLORS[understanding] || UNDERSTANDING_COLORS.not_started;
 
   return (
-    <div className="p-3 rounded-lg border border-neutral-200 hover:border-revision-green-300 transition bg-white">
+    <div className="p-3 rounded-lg border border-neutral-200 hover:border-turquoise-300 transition bg-white">
       <div className="flex items-start justify-between">
         <div>
           <h4 className="text-sm font-medium text-neutral-900">
@@ -295,7 +295,7 @@ export function ProgressSidebarCompact({
             {sessionCount} sessions completed
           </p>
           {learningProfile && (
-            <p className="text-xs text-revision-green-600">
+            <p className="text-xs text-azure-500">
               {learningProfile.isMultimodal
                 ? "Multi-style learner"
                 : `${learningProfile.primaryStyles[0]?.replace("_", "/")} learner`}
@@ -307,7 +307,7 @@ export function ProgressSidebarCompact({
             {learningProfile.primaryStyles.slice(0, 2).map((style) => (
               <span
                 key={style}
-                className="text-xs px-2 py-1 bg-revision-green-50 text-revision-green-700 rounded-full"
+                className="text-xs px-2 py-1 bg-turquoise-50 text-turquoise-700 rounded-full"
               >
                 {style.charAt(0).toUpperCase()}
               </span>

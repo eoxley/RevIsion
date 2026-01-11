@@ -395,7 +395,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#ffffff',
   },
   header: {
-    background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
+    background: 'linear-gradient(135deg, #3783a5 0%, #8B5CF6 100%)',
     padding: '32px 24px',
     textAlign: 'center' as const,
   },
@@ -527,7 +527,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   momentumBar: {
     height: '100%',
-    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 100%)',
+    background: 'linear-gradient(90deg, #3783a5 0%, #8B5CF6 100%)',
     borderRadius: '5px',
     transition: 'width 0.3s ease',
   },
@@ -583,7 +583,7 @@ const styles: Record<string, React.CSSProperties> = {
   subjectPercentage: {
     fontSize: '14px',
     fontWeight: 600,
-    color: '#3B82F6',
+    color: '#3783a5',
   },
   progressBarContainer: {
     height: '6px',
@@ -615,7 +615,7 @@ const styles: Record<string, React.CSSProperties> = {
   winIcon: {
     width: '24px',
     height: '24px',
-    backgroundColor: '#22c55e',
+    backgroundColor: '#37a87b',
     color: '#ffffff',
     borderRadius: '50%',
     display: 'flex',
@@ -733,7 +733,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   ctaButton: {
     display: 'inline-block',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#3783a5',
     color: '#ffffff',
     fontSize: '16px',
     fontWeight: 600,
@@ -757,7 +757,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 0 16px 0',
   },
   footerLink: {
-    color: '#3B82F6',
+    color: '#3783a5',
     textDecoration: 'none',
   },
   copyright: {

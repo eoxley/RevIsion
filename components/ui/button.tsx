@@ -9,7 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 /**
  * Brand-compliant Button component
  *
- * Colors: Uses revision-blue for primary, revision-green for positive actions
+ * Colors: Azure Blue #3783a5 for primary, Turquoise #37a87b for positive actions
  * NO red, yellow, or purple variants
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -17,13 +17,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-revision-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azure-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           {
-            // Primary - revision blue
-            "bg-revision-blue-600 text-white hover:bg-revision-blue-700":
+            // Primary - Azure Blue
+            "bg-azure-500 text-white hover:bg-azure-600":
               variant === "default",
-            // Secondary - revision green (for positive actions)
-            "bg-revision-green-500 text-white hover:bg-revision-green-600":
+            // Secondary - Turquoise (for positive actions)
+            "bg-turquoise-500 text-white hover:bg-turquoise-600":
               variant === "secondary",
             // Outline - neutral border
             "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50":

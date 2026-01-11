@@ -9,50 +9,80 @@ module.exports = {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════
-        // myrevisionary Brand Colors (STRICT - from logo)
+        // myrevisionary Brand Colors (HARDCODED)
+        // Azure Blue: #3783a5 - headings, primary actions
+        // Turquoise: #37a87b - progress, positive reinforcement
         // ═══════════════════════════════════════════════════════════════
 
-        // Primary Blue - used for primary actions, headers, agent chat bubbles
+        // Azure Blue - used for headings, primary actions, buttons
+        azure: {
+          50: '#e9f3f7',
+          100: '#d3e7ef',
+          200: '#a7cfdf',
+          300: '#7bb7cf',
+          400: '#4f9fbf',
+          500: '#3783a5',   // PRIMARY - Azure Blue #3783a5
+          600: '#2c6984',
+          700: '#214f63',
+          800: '#163542',
+          900: '#0b1a21',
+          950: '#050d10',
+        },
+
+        // Turquoise - used for progress, success, positive reinforcement
+        turquoise: {
+          50: '#e9f7f2',
+          100: '#d3efe5',
+          200: '#a7dfcb',
+          300: '#7bcfb1',
+          400: '#4fbf97',
+          500: '#37a87b',   // PRIMARY - Turquoise #37a87b
+          600: '#2c8662',
+          700: '#21654a',
+          800: '#164331',
+          900: '#0b2219',
+          950: '#05110c',
+        },
+
+        // Legacy aliases for backward compatibility (maps to new colors)
         revision: {
           blue: {
-            50: '#e8f1f8',
-            100: '#d1e3f1',
-            200: '#a3c7e3',
-            300: '#75abd5',
-            400: '#478fc7',
-            500: '#1e6aab',   // Primary blue from logo text
-            600: '#1a5a91',
-            700: '#164a77',   // Navy from wordmark
-            800: '#123a5d',
-            900: '#0e2a43',
-            950: '#0a1a29',
+            50: '#e9f3f7',
+            100: '#d3e7ef',
+            200: '#a7cfdf',
+            300: '#7bb7cf',
+            400: '#4f9fbf',
+            500: '#3783a5',   // Azure Blue
+            600: '#2c6984',
+            700: '#214f63',
+            800: '#163542',
+            900: '#0b1a21',
+            950: '#050d10',
           },
-          // Primary Green - used for progress, positive reinforcement, capital I
           green: {
-            50: '#eefbee',
-            100: '#ddf7dd',
-            200: '#bbefbb',
-            300: '#99e799',
-            400: '#5dd35d',
-            500: '#4abe4c',   // Primary green from logo "I"
-            600: '#3da33f',
-            700: '#328833',
-            800: '#276d28',
-            900: '#1c521c',
-            950: '#113711',
+            50: '#e9f7f2',
+            100: '#d3efe5',
+            200: '#a7dfcb',
+            300: '#7bcfb1',
+            400: '#4fbf97',
+            500: '#37a87b',   // Turquoise
+            600: '#2c8662',
+            700: '#21654a',
+            800: '#164331',
+            900: '#0b2219',
+            950: '#05110c',
           },
-          // Teal - gradient transition color from logo
           teal: {
-            50: '#e6f7f9',
-            100: '#cceff3',
-            200: '#99dfe7',
-            300: '#66cfdb',
-            400: '#33bfcf',
-            500: '#2ba8b8',   // Mid-gradient from logo
-            600: '#238a97',
-            700: '#1b6c76',
-            800: '#144e55',
-            900: '#0c3034',
+            50: '#e9f5f4',
+            100: '#d3ebe9',
+            200: '#a7d7d3',
+            300: '#7bc3bd',
+            400: '#4fafa7',
+            500: '#3796a0',   // Blend of azure and turquoise
+            600: '#2c7880',
+            700: '#215a60',
+            800: '#163c40',
+            900: '#0b1e20',
           },
         },
 

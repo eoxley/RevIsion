@@ -87,13 +87,13 @@ export function LearningInsights() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-slate-600">Overall Accuracy</span>
-            <span className="text-2xl font-bold text-revision-blue-600">
+            <span className="text-2xl font-bold text-azure-500">
               {insights.accuracy_percentage}%
             </span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2">
             <div
-              className="bg-revision-green-500 h-2 rounded-full transition-all"
+              className="bg-turquoise-500 h-2 rounded-full transition-all"
               style={{ width: `${insights.accuracy_percentage}%` }}
             />
           </div>

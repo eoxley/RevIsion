@@ -103,7 +103,7 @@ export function OnboardingFlow({
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-revision-green-50 text-revision-green-700 rounded-full text-sm font-medium mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-turquoise-50 text-turquoise-700 rounded-full text-sm font-medium mb-6">
           <span>Setting up your child&apos;s revision</span>
         </div>
         <h1 className="text-3xl font-bold text-neutral-900 mb-2">
@@ -129,9 +129,9 @@ export function OnboardingFlow({
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               step === "child-details"
-                ? "bg-revision-green-500 text-white"
+                ? "bg-turquoise-500 text-white"
                 : isChildDetailsComplete
-                ? "bg-revision-green-100 text-revision-green-700"
+                ? "bg-turquoise-100 text-turquoise-700"
                 : "bg-neutral-200 text-neutral-500"
             }`}
           >
@@ -147,9 +147,9 @@ export function OnboardingFlow({
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               step === "subjects"
-                ? "bg-revision-green-500 text-white"
+                ? "bg-turquoise-500 text-white"
                 : isSubjectsComplete
-                ? "bg-revision-green-100 text-revision-green-700"
+                ? "bg-turquoise-100 text-turquoise-700"
                 : "bg-neutral-200 text-neutral-500"
             }`}
           >
@@ -165,9 +165,9 @@ export function OnboardingFlow({
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               step === "learning-style"
-                ? "bg-revision-green-500 text-white"
+                ? "bg-turquoise-500 text-white"
                 : hasLearningStyle
-                ? "bg-revision-green-100 text-revision-green-700"
+                ? "bg-turquoise-100 text-turquoise-700"
                 : "bg-neutral-200 text-neutral-500"
             }`}
           >
@@ -183,9 +183,9 @@ export function OnboardingFlow({
         {step === "child-details" && (
           <form onSubmit={handleChildDetailsSubmit} className="space-y-6">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-revision-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-turquoise-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-8 h-8 text-revision-green-600"
+                  className="w-8 h-8 text-turquoise-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -248,9 +248,9 @@ export function OnboardingFlow({
         {/* Step 3: Learning style */}
         {step === "learning-style" && (
           <div className="text-center">
-            <div className="w-20 h-20 bg-revision-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-turquoise-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg
-                className="w-10 h-10 text-revision-green-600"
+                className="w-10 h-10 text-turquoise-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -272,7 +272,7 @@ export function OnboardingFlow({
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/assessment"
-                className="inline-flex items-center justify-center px-6 py-3 bg-revision-green-500 text-white rounded-lg font-medium hover:bg-revision-green-600 transition"
+                className="inline-flex items-center justify-center px-6 py-3 bg-turquoise-500 text-white rounded-lg font-medium hover:bg-turquoise-600 transition"
               >
                 Take the quiz (2 mins)
               </Link>

@@ -72,12 +72,12 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   FOOD_TECH: "🍳",
 };
 
-// Understanding level colors
+// Understanding level colors - Azure Blue #3783a5, Turquoise #37a87b
 const UNDERSTANDING_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
   not_started: { bg: "bg-neutral-100", text: "text-neutral-500", bar: "bg-neutral-300" },
   building: { bg: "bg-amber-50", text: "text-amber-600", bar: "bg-amber-400" },
-  strengthening: { bg: "bg-blue-50", text: "text-blue-600", bar: "bg-blue-400" },
-  secure: { bg: "bg-revision-green-50", text: "text-revision-green-600", bar: "bg-revision-green-500" },
+  strengthening: { bg: "bg-azure-50", text: "text-azure-600", bar: "bg-azure-500" },
+  secure: { bg: "bg-turquoise-50", text: "text-turquoise-600", bar: "bg-turquoise-500" },
 };
 
 export function SubjectCards({ studentSubjects, onSubjectClick }: SubjectCardsProps) {
@@ -153,14 +153,14 @@ export function SubjectCards({ studentSubjects, onSubjectClick }: SubjectCardsPr
               disabled={isLoading}
               className={cn(
                 "relative p-4 rounded-xl border-2 text-left transition-all hover:shadow-md active:scale-[0.98]",
-                "bg-white hover:border-revision-green-300",
+                "bg-white hover:border-turquoise-300",
                 isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"
               )}
             >
               {/* Loading overlay */}
               {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/50 rounded-xl">
-                  <div className="w-5 h-5 border-2 border-revision-green-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-turquoise-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
 

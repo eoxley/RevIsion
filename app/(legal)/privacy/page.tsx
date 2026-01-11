@@ -32,8 +32,8 @@ export default function PrivacyPolicy() {
             </p>
             <p className="text-neutral-600 mb-4">
               <strong>Contact:</strong><br />
-              General support: <a href="mailto:support@myrevisionary.com" className="text-revision-green-600 hover:underline">support@myrevisionary.com</a><br />
-              Privacy enquiries: <a href="mailto:privacy@myrevisionary.com" className="text-revision-green-600 hover:underline">privacy@myrevisionary.com</a><br />
+              General support: <a href="mailto:support@myrevisionary.com" className="text-azure-500 hover:underline">support@myrevisionary.com</a><br />
+              Privacy enquiries: <a href="mailto:privacy@myrevisionary.com" className="text-azure-500 hover:underline">privacy@myrevisionary.com</a><br />
               Address: myrevisionary ltd, United Kingdom
             </p>
           </section>
@@ -179,7 +179,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-neutral-200">
-          <Link href="/" className="text-revision-green-600 hover:text-revision-green-700 font-medium">
+          <Link href="/" className="text-azure-500 hover:text-azure-600 font-medium">
             &larr; Back to home
           </Link>
         </div>

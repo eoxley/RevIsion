@@ -21,15 +21,15 @@ interface ReadinessData {
 const LEVEL_CONFIG = {
   ready: {
     label: "Ready",
-    color: "text-green-600",
-    bgColor: "bg-green-100",
-    progressColor: "bg-green-500",
+    color: "text-turquoise-600",
+    bgColor: "bg-turquoise-100",
+    progressColor: "bg-turquoise-500",
   },
   almost_ready: {
     label: "Almost Ready",
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-    progressColor: "bg-blue-500",
+    color: "text-azure-600",
+    bgColor: "bg-azure-100",
+    progressColor: "bg-azure-500",
   },
   needs_work: {
     label: "Building",
@@ -86,7 +86,7 @@ export function ReadinessIndicator() {
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-revision-green-600">
+        <h3 className="text-sm font-medium text-azure-500">
           Exam Readiness
         </h3>
         <span className="text-xs text-neutral-500">

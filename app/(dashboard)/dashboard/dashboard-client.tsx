@@ -161,19 +161,19 @@ export function DashboardClient({
 
         {/* Learning style prompt if not completed */}
         {!learningProfile && !subjectContext && (
-          <div className="mb-4 p-4 bg-revision-green-50 border border-revision-green-100 rounded-xl">
+          <div className="mb-4 p-4 bg-turquoise-50 border border-turquoise-100 rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-revision-green-800">
+                <p className="text-sm font-medium text-turquoise-800">
                   Let's find out how you learn best
                 </p>
-                <p className="text-xs text-revision-green-600 mt-0.5">
+                <p className="text-xs text-turquoise-600 mt-0.5">
                   Quick quiz to unlock personalised revision tips
                 </p>
               </div>
               <Link
                 href="/assessment"
-                className="px-4 py-2 bg-revision-green-600 text-white text-sm font-medium rounded-lg hover:bg-revision-green-700 transition"
+                className="px-4 py-2 bg-turquoise-600 text-white text-sm font-medium rounded-lg hover:bg-turquoise-700 transition"
               >
                 Take the quiz
               </Link>
@@ -188,7 +188,7 @@ export function DashboardClient({
               <h2 className="text-sm font-medium text-neutral-600">Your Subjects</h2>
               <Link
                 href="/onboarding?edit=subjects"
-                className="text-xs text-revision-green-600 hover:text-revision-green-700 font-medium"
+                className="text-xs text-turquoise-600 hover:text-turquoise-700 font-medium"
               >
                 Edit subjects
               </Link>
@@ -201,10 +201,10 @@ export function DashboardClient({
             ) : (
               <Link
                 href="/onboarding?edit=subjects"
-                className="block p-6 border-2 border-dashed border-neutral-200 rounded-xl text-center hover:border-revision-green-300 transition"
+                className="block p-6 border-2 border-dashed border-neutral-200 rounded-xl text-center hover:border-turquoise-300 transition"
               >
                 <p className="text-neutral-500">No subjects selected yet</p>
-                <p className="text-sm text-revision-green-600 font-medium mt-1">
+                <p className="text-sm text-turquoise-600 font-medium mt-1">
                   Click to add subjects
                 </p>
               </Link>

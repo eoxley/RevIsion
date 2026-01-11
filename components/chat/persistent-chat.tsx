@@ -783,7 +783,7 @@ What do you need help with?`;
       <div className="flex flex-col h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm">
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-revision-green-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-turquoise-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-neutral-500">
               Loading your revision session...
             </p>
@@ -804,7 +804,7 @@ What do you need help with?`;
             <p className="text-sm text-neutral-600">{sessionError}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-revision-green-500 hover:bg-revision-green-600 text-white text-sm rounded-lg transition"
+              className="px-4 py-2 bg-turquoise-500 hover:bg-turquoise-600 text-white text-sm rounded-lg transition"
             >
               Refresh page
             </button>
@@ -839,14 +839,14 @@ What do you need help with?`;
                 <BackIcon className="w-4 h-4 text-neutral-600" />
               </button>
             )}
-            <div className="w-10 h-10 rounded-full bg-revision-green-100 flex items-center justify-center">
-              <BrainIcon className="w-6 h-6 text-revision-green-600" />
+            <div className="w-10 h-10 rounded-full bg-turquoise-100 flex items-center justify-center">
+              <BrainIcon className="w-6 h-6 text-turquoise-600" />
             </div>
             <div>
               <h3 className="font-semibold text-neutral-900">
                 {subjectContext ? subjectContext.subjectName : "myrevisionary Coach"}
               </h3>
-              <p className="text-sm text-revision-green-600">
+              <p className="text-sm text-turquoise-600">
                 {subjectContext
                   ? revisionPhase
                     ? `Revision mode: ${revisionPhase.replace("_", " ")}`
@@ -865,7 +865,7 @@ What do you need help with?`;
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition",
                 autoPlayEnabled
-                  ? "bg-revision-green-100 text-revision-green-700"
+                  ? "bg-turquoise-100 text-turquoise-700"
                   : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
               )}
               title="Auto-play responses"
@@ -891,7 +891,7 @@ What do you need help with?`;
               className={cn(
                 "max-w-[85%] rounded-2xl px-4 py-3",
                 message.role === "user"
-                  ? "bg-revision-green-500 text-white rounded-br-md"
+                  ? "bg-turquoise-500 text-white rounded-br-md"
                   : "bg-white text-neutral-900 rounded-bl-md border border-neutral-200 shadow-sm"
               )}
             >
@@ -919,7 +919,7 @@ What do you need help with?`;
                     className={cn(
                       "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition",
                       playingMessageIndex === index
-                        ? "bg-revision-green-100 text-revision-green-700"
+                        ? "bg-turquoise-100 text-turquoise-700"
                         : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                     )}
                   >
@@ -954,20 +954,20 @@ What do you need help with?`;
                 <div className="flex items-center gap-2">
                   {isProcessingImage ? (
                     <>
-                      <CameraIcon className="w-4 h-4 text-revision-green-500" />
-                      <span className="text-sm text-revision-green-600">
+                      <CameraIcon className="w-4 h-4 text-turquoise-500" />
+                      <span className="text-sm text-turquoise-600">
                         Reading your image...
                       </span>
                     </>
                   ) : (
                     <div className="flex gap-1.5">
-                      <span className="w-2 h-2 bg-revision-green-400 rounded-full animate-bounce" />
+                      <span className="w-2 h-2 bg-turquoise-400 rounded-full animate-bounce" />
                       <span
-                        className="w-2 h-2 bg-revision-green-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-turquoise-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.1s" }}
                       />
                       <span
-                        className="w-2 h-2 bg-revision-green-400 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-turquoise-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       />
                     </div>
@@ -994,7 +994,7 @@ What do you need help with?`;
                     setInput(prompt);
                   }
                 }}
-                className="text-xs px-3 py-1.5 bg-revision-green-50 hover:bg-revision-green-100 rounded-full text-revision-green-700 transition flex items-center gap-1"
+                className="text-xs px-3 py-1.5 bg-turquoise-50 hover:bg-turquoise-100 rounded-full text-turquoise-700 transition flex items-center gap-1"
               >
                 {prompt.toLowerCase().includes("upload") && (
                   <CameraIcon className="w-3 h-3" />
@@ -1017,8 +1017,8 @@ What do you need help with?`;
             className={cn(
               "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition",
               isProcessingImage
-                ? "bg-revision-green-100 text-revision-green-500"
-                : "bg-neutral-100 text-neutral-600 hover:bg-revision-green-50 hover:text-revision-green-600"
+                ? "bg-turquoise-100 text-turquoise-500"
+                : "bg-neutral-100 text-neutral-600 hover:bg-turquoise-50 hover:text-turquoise-600"
             )}
             title="Upload image (textbook, notes, past paper)"
           >
@@ -1037,10 +1037,10 @@ What do you need help with?`;
             className={cn(
               "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition",
               isRecording
-                ? "bg-revision-green-500 text-white animate-pulse"
+                ? "bg-turquoise-500 text-white animate-pulse"
                 : isTranscribing
                   ? "bg-neutral-200 text-neutral-400"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-revision-green-50 hover:text-revision-green-600"
+                  : "bg-neutral-100 text-neutral-600 hover:bg-turquoise-50 hover:text-turquoise-600"
             )}
             title={isRecording ? "Stop recording" : "Start voice input"}
           >
@@ -1065,7 +1065,7 @@ What do you need help with?`;
                     ? "Processing image..."
                     : "Type, speak, or upload a pic..."
             }
-            className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-revision-green-500 focus:border-transparent"
+            className="flex-1 px-4 py-2.5 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
             disabled={isLoading || isRecording || isTranscribing || isProcessingImage}
           />
 
@@ -1080,7 +1080,7 @@ What do you need help with?`;
               isProcessingImage ||
               !session
             }
-            className="bg-revision-green-500 hover:bg-revision-green-600 text-white"
+            className="bg-turquoise-500 hover:bg-turquoise-600 text-white"
           >
             Send
           </Button>
@@ -1088,7 +1088,7 @@ What do you need help with?`;
 
         {/* Recording indicator */}
         {isRecording && (
-          <p className="text-xs text-revision-green-600 mt-2 text-center">
+          <p className="text-xs text-turquoise-600 mt-2 text-center">
             Recording... Tap the mic again to stop
           </p>
         )}

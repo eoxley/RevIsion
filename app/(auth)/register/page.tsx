@@ -165,7 +165,7 @@ export default function RegisterPage() {
                 Already have an account?{" "}
                 <Link
                   href="/login"
-                  className="text-revision-blue-600 hover:text-revision-blue-700 font-medium"
+                  className="text-azure-600 hover:text-azure-700 font-medium"
                 >
                   Sign in
                 </Link>

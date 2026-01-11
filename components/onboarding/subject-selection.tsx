@@ -101,7 +101,7 @@ export function SubjectSelection({
                     "px-4 py-2 rounded-full text-sm font-medium transition-all",
                     "flex items-center gap-2",
                     selectedSubjects.includes(subject.code)
-                      ? "bg-revision-green-500 text-white shadow-md"
+                      ? "bg-turquoise-500 text-white shadow-md"
                       : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
                   )}
                 >
@@ -121,7 +121,7 @@ export function SubjectSelection({
             "Select at least one subject"
           ) : (
             <>
-              <span className="font-medium text-revision-green-600">
+              <span className="font-medium text-turquoise-600">
                 {selectedSubjects.length}
               </span>{" "}
               {selectedSubjects.length === 1 ? "subject" : "subjects"} selected
@@ -131,7 +131,7 @@ export function SubjectSelection({
         <Button
           onClick={handleSubmit}
           disabled={selectedSubjects.length === 0 || isLoading}
-          className="bg-revision-green-500 hover:bg-revision-green-600 text-white"
+          className="bg-turquoise-500 hover:bg-turquoise-600 text-white"
         >
           {isLoading ? "Saving..." : "Continue"}
         </Button>
@@ -154,7 +154,7 @@ export function SubjectChips({ subjects }: { subjects: string[] }) {
         return (
           <span
             key={code}
-            className="inline-flex items-center gap-1 px-2 py-1 bg-revision-green-50 text-revision-green-700 rounded-full text-xs"
+            className="inline-flex items-center gap-1 px-2 py-1 bg-turquoise-50 text-turquoise-700 rounded-full text-xs"
           >
             <span>{subject.emoji}</span>
             <span>{subject.name}</span>

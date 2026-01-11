@@ -251,7 +251,7 @@ function getLearningStyleInfo(style: LearningStyle) {
     visual: {
       label: 'Visual',
       emoji: '👁️',
-      colour: '#3B82F6',
+      colour: '#3783a5',
       description: 'diagrams, charts, colours, and visual aids',
     },
     auditory: {
@@ -263,7 +263,7 @@ function getLearningStyleInfo(style: LearningStyle) {
     read_write: {
       label: 'Read/Write',
       emoji: '📝',
-      colour: '#22C55E',
+      colour: '#37a87b',
       description: 'reading, note-taking, and written materials',
     },
     kinesthetic: {
@@ -310,7 +310,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#ffffff',
   },
   header: {
-    background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
+    background: 'linear-gradient(135deg, #3783a5 0%, #8B5CF6 100%)',
     padding: '32px 24px',
     textAlign: 'center' as const,
   },
@@ -418,7 +418,7 @@ const styles: Record<string, React.CSSProperties> = {
   breakdownPercentage: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#3B82F6',
+    color: '#3783a5',
   },
   breakdownBarContainer: {
     height: '8px',
@@ -458,7 +458,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tipItem: {
     fontSize: '14px',
-    color: '#3b82f6',
+    color: '#3783a5',
     marginBottom: '8px',
   },
   subjectGrid: {
@@ -490,7 +490,7 @@ const styles: Record<string, React.CSSProperties> = {
   stepNumber: {
     width: '32px',
     height: '32px',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#3783a5',
     color: '#ffffff',
     borderRadius: '50%',
     display: 'flex',
@@ -576,7 +576,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   ctaButton: {
     display: 'inline-block',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#3783a5',
     color: '#ffffff',
     fontSize: '16px',
     fontWeight: 600,
@@ -616,7 +616,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 0 16px 0',
   },
   footerLink: {
-    color: '#3B82F6',
+    color: '#3783a5',
     textDecoration: 'none',
   },
   copyright: {

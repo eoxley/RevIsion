@@ -9,7 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 /**
  * Brand-compliant Input component
  *
- * Colors: Uses revision-blue for focus, neutral greys for errors (NO red)
+ * Colors: Uses azure for focus, neutral greys for errors (NO red)
  * Error states use muted grey text to maintain calm UI
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -23,7 +23,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           className={cn(
-            "flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-revision-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50",
+            "flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-azure-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-neutral-50",
             error
               ? "border-neutral-400 bg-neutral-50"
               : "border-neutral-300",

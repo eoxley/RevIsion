@@ -236,7 +236,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#ffffff',
   },
   header: {
-    background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)',
+    background: 'linear-gradient(135deg, #3783a5 0%, #8B5CF6 100%)',
     padding: '32px 24px',
     textAlign: 'center' as const,
   },
@@ -286,7 +286,7 @@ const styles: Record<string, React.CSSProperties> = {
   statNumber: {
     fontSize: '28px',
     fontWeight: 700,
-    color: '#3B82F6',
+    color: '#3783a5',
   },
   statLabel: {
     fontSize: '12px',
@@ -323,7 +323,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   momentumBar: {
     height: '100%',
-    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 100%)',
+    background: 'linear-gradient(90deg, #3783a5 0%, #8B5CF6 100%)',
     borderRadius: '6px',
   },
   momentumValue: {
@@ -378,7 +378,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   subjectProgress: {
     fontSize: '12px',
-    color: '#3B82F6',
+    color: '#3783a5',
     fontWeight: 500,
   },
   subjectTime: {
@@ -394,7 +394,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px',
     backgroundColor: '#ecfdf5',
     borderRadius: '8px',
-    borderLeft: '4px solid #22c55e',
+    borderLeft: '4px solid #37a87b',
   },
   progressTopic: {
     fontSize: '14px',
@@ -412,10 +412,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#71717a',
   },
   arrow: {
-    color: '#22c55e',
+    color: '#37a87b',
   },
   currentState: {
-    color: '#22c55e',
+    color: '#37a87b',
     fontWeight: 600,
   },
   focusList: {
@@ -462,7 +462,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   ctaButton: {
     display: 'inline-block',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#3783a5',
     color: '#ffffff',
     fontSize: '16px',
     fontWeight: 600,
@@ -485,7 +485,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '0 0 16px 0',
   },
   footerLink: {
-    color: '#3B82F6',
+    color: '#3783a5',
     textDecoration: 'none',
   },
   copyright: {

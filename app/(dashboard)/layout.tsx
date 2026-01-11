@@ -10,7 +10,7 @@ import { Logo } from "@/components/brand/logo";
  * - myrevisionary logo (brain-lightbulb with wordmark)
  * - Minimal navigation
  * - Neutral colors for inactive states
- * - revision-blue for active/primary states
+ * - azure for active/primary states
  *
  * NO red, yellow, purple, or gamification colors.
  */
@@ -108,7 +108,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="px-3 py-2 text-sm font-medium text-neutral-600 hover:text-revision-blue-600 hover:bg-revision-blue-50 rounded-lg transition"
+      className="px-3 py-2 text-sm font-medium text-neutral-600 hover:text-azure-600 hover:bg-azure-50 rounded-lg transition"
     >
       {children}
     </Link>
@@ -128,7 +128,7 @@ function MobileNavLink({
   return (
     <Link
       href={href}
-      className="px-4 py-2 text-xs font-medium text-neutral-600 hover:text-revision-blue-600 transition"
+      className="px-4 py-2 text-xs font-medium text-neutral-600 hover:text-azure-600 transition"
     >
       {children}
     </Link>
