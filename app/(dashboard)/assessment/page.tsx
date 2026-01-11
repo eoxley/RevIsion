@@ -177,6 +177,32 @@ export default function AssessmentPage() {
       return;
     }
 
+    // PHASE 3: Sync to student_vark_profiles for email compatibility
+    const dominantStyle = result.primaryStyles[0] || "visual";
+    const getStrength = (score: number): string => {
+      if (score >= 35) return "very_strong";
+      if (score >= 25) return "strong";
+      if (score >= 15) return "moderate";
+      return "mild";
+    };
+
+    await supabase.from("student_vark_profiles").upsert({
+      student_id: user.id,
+      visual_score: result.percentages.visual,
+      auditory_score: result.percentages.auditory,
+      read_write_score: result.percentages.readWrite,
+      kinesthetic_score: result.percentages.kinesthetic,
+      primary_styles: result.primaryStyles,
+      is_multimodal: result.isMultimodal,
+      dominant_style: dominantStyle,
+      visual_strength: getStrength(result.percentages.visual),
+      auditory_strength: getStrength(result.percentages.auditory),
+      read_write_strength: getStrength(result.percentages.readWrite),
+      kinesthetic_strength: getStrength(result.percentages.kinesthetic),
+      assessed_at: new Date().toISOString(),
+      last_recalculated_at: new Date().toISOString(),
+    }, { onConflict: "student_id" });
+
     // Send welcome email to parent (non-blocking)
     fetch("/api/email/welcome", {
       method: "POST",
