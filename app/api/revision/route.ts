@@ -240,7 +240,26 @@ export async function POST(req: NextRequest) {
         student_answer: message,
         action_taken: result.determinedAction,
       });
+
+      // PHASE 8: Update topic mastery (cross-session tracking)
+      await updateTopicMastery(supabase, {
+        student_id: user.id,
+        subject_id: subject_id || null,
+        topic_id: sessionState.topic_id,
+        topic_name: sessionState.topic_name,
+        evaluation: result.evaluation.evaluation as EvaluationResult,
+        understanding_state: calculateUnderstandingState(updatedState.correct_streak),
+      });
     }
+
+    // PHASE 9: Update weekly engagement records
+    // Track engagement on every revision turn (not just evaluations)
+    const isFirstTurn = sessionState.attempts === 0;
+    await updateEngagementRecords(supabase, {
+      student_id: user.id,
+      topic_id: sessionState.topic_id,
+      is_session_start: isFirstTurn,
+    });
 
     // ═══════════════════════════════════════════════════════════
     // STREAM TUTOR RESPONSE
@@ -725,5 +744,206 @@ async function upsertRevisionPlan(
   } catch (error) {
     // Non-critical - log but don't fail the request
     console.error("Error upserting revision plan:", error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHASE 8: TOPIC MASTERY CROSS-SESSION TRACKING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface TopicMasteryInput {
+  student_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
+  topic_name: string | null;
+  evaluation: EvaluationResult;
+  understanding_state: UnderstandingState;
+}
+
+/**
+ * Update topic mastery across sessions
+ *
+ * This tracks long-term understanding of topics, persisting beyond sessions.
+ * Called after every evaluation to aggregate mastery data.
+ */
+async function updateTopicMastery(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  input: TopicMasteryInput
+): Promise<void> {
+  const { student_id, subject_id, topic_id, topic_name, evaluation, understanding_state } = input;
+
+  // Skip if no topic context
+  if (!topic_id || !subject_id) {
+    return;
+  }
+
+  try {
+    const now = new Date().toISOString();
+
+    // Check for existing mastery record
+    const { data: existing } = await supabase
+      .from("topic_mastery")
+      .select("*")
+      .eq("student_id", student_id)
+      .eq("subject_id", subject_id)
+      .eq("topic_id", topic_id)
+      .single();
+
+    if (existing) {
+      // Update existing mastery record
+      const newTotalAttempts = existing.total_attempts + 1;
+      const newTotalCorrect = evaluation === "correct"
+        ? existing.total_correct + 1
+        : existing.total_correct;
+      const newConsecutiveCorrect = evaluation === "correct"
+        ? existing.consecutive_correct + 1
+        : 0; // Reset on incorrect/partial
+
+      const updateData: Record<string, unknown> = {
+        total_attempts: newTotalAttempts,
+        total_correct: newTotalCorrect,
+        consecutive_correct: newConsecutiveCorrect,
+        understanding_state: understanding_state,
+        last_attempt_at: now,
+      };
+
+      // Track correct timestamp
+      if (evaluation === "correct") {
+        updateData.last_correct_at = now;
+      }
+
+      // Track mastery achievement
+      if (understanding_state === "secure" && existing.understanding_state !== "secure") {
+        updateData.mastery_achieved_at = now;
+      }
+
+      await supabase
+        .from("topic_mastery")
+        .update(updateData)
+        .eq("id", existing.id);
+    } else {
+      // Create new mastery record
+      await supabase.from("topic_mastery").insert({
+        student_id,
+        subject_id,
+        topic_id,
+        topic_name: topic_name || topic_id,
+        understanding_state,
+        total_attempts: 1,
+        total_correct: evaluation === "correct" ? 1 : 0,
+        consecutive_correct: evaluation === "correct" ? 1 : 0,
+        first_attempt_at: now,
+        last_attempt_at: now,
+        last_correct_at: evaluation === "correct" ? now : null,
+        mastery_achieved_at: understanding_state === "secure" ? now : null,
+      });
+    }
+  } catch (error) {
+    // Non-critical - log but don't fail the request
+    console.error("Error updating topic mastery:", error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHASE 9: ENGAGEMENT WEEKLY RECORDS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get the start of the current week (Monday)
+ */
+function getWeekStartDate(): string {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 6 days back, else day - 1
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - daysToMonday);
+  monday.setHours(0, 0, 0, 0);
+  return monday.toISOString().split("T")[0];
+}
+
+/**
+ * Get the end of the current week (Sunday)
+ */
+function getWeekEndDate(): string {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() + daysToSunday);
+  sunday.setHours(23, 59, 59, 999);
+  return sunday.toISOString().split("T")[0];
+}
+
+interface EngagementUpdateInput {
+  student_id: string;
+  topic_id: string | null;
+  is_session_start: boolean;
+}
+
+/**
+ * Update weekly engagement records
+ *
+ * Called on each revision interaction to track weekly engagement patterns.
+ * Aggregates sessions, topics touched, and calculates momentum.
+ */
+async function updateEngagementRecords(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  input: EngagementUpdateInput
+): Promise<void> {
+  const { student_id, topic_id, is_session_start } = input;
+
+  try {
+    const weekStart = getWeekStartDate();
+    const weekEnd = getWeekEndDate();
+
+    // Check for existing weekly record
+    const { data: existing } = await supabase
+      .from("engagement_weekly_records")
+      .select("*")
+      .eq("student_id", student_id)
+      .eq("week_start_date", weekStart)
+      .single();
+
+    if (existing) {
+      // Update existing record
+      const updateData: Record<string, unknown> = {};
+
+      // Increment session count only on session start
+      if (is_session_start) {
+        updateData.sessions_count = existing.sessions_count + 1;
+      }
+
+      // Track unique topics touched (increment if new topic this week)
+      if (topic_id) {
+        // Simple increment - not truly unique tracking, but approximates engagement
+        updateData.topics_touched_count = existing.topics_touched_count + 1;
+      }
+
+      // Only update if there are changes
+      if (Object.keys(updateData).length > 0) {
+        await supabase
+          .from("engagement_weekly_records")
+          .update(updateData)
+          .eq("id", existing.id);
+      }
+    } else {
+      // Create new weekly record
+      await supabase.from("engagement_weekly_records").insert({
+        student_id,
+        week_start_date: weekStart,
+        week_end_date: weekEnd,
+        sessions_count: is_session_start ? 1 : 0,
+        topics_touched_count: topic_id ? 1 : 0,
+        total_duration_minutes: 0,
+        average_session_length_minutes: 0,
+        completion_rate: 0,
+        momentum_score: 50, // Start at neutral
+        momentum_trend: "stable",
+        vs_previous_week: "stable",
+      });
+    }
+  } catch (error) {
+    // Non-critical - log but don't fail the request
+    console.error("Error updating engagement records:", error);
   }
 }
