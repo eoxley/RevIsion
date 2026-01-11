@@ -19,6 +19,7 @@
  */
 
 import { cn } from "@/lib/utils";
+import { ReadinessIndicator } from "./readiness-indicator";
 
 interface Subject {
   id: string;
@@ -112,6 +113,11 @@ export function ProgressSidebar({
           )}
         </div>
       )}
+
+      {/* Exam Readiness Section */}
+      <div className="p-4 border-b border-neutral-200">
+        <ReadinessIndicator />
+      </div>
 
       {/* Subjects Section */}
       <div className="flex-1 overflow-y-auto p-4">
